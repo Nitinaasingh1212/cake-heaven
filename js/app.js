@@ -334,8 +334,25 @@ const App = {
                                     <input type="text" id="custom_msg" placeholder="Happy Birthday..." style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
                                 </div>
                                 <div class="form-group">
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Delivery Date</label>
-                                    <input type="date" id="custom_date" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Delivery Address</label>
+                                    <textarea id="custom_address" placeholder="Full Delivery Address" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; min-height: 80px;"></textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Delivery Date</label>
+                                        <input type="date" id="custom_date" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Delivery Time</label>
+                                        <input type="time" id="custom_time" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+                                    </div>
+                                </div>
+                                <div style="margin: 10px 0;">
+                                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">Payment Option</label>
+                                    <div style="display: flex; gap: 15px;">
+                                        <label><input type="radio" name="custom_payment" value="UPI" checked> UPI</label>
+                                        <label><input type="radio" name="custom_payment" value="COD"> Cash on Delivery</label>
+                                    </div>
                                 </div>
                                 <button type="submit" class="btn-primary" style="margin-top: 20px;">Submit via WhatsApp</button>
                             </form>
@@ -662,60 +679,52 @@ const App = {
                 const size = document.getElementById('custom_size').value;
                 const cakeMsg = document.getElementById('custom_msg').value;
                 const date = document.getElementById('custom_date').value;
+                const time = document.getElementById('custom_time').value;
+                const address = document.getElementById('custom_address').value;
+                const payment = document.querySelector('input[name="custom_payment"]:checked')?.value || 'UPI';
                 const file = document.getElementById('custom_image').files[0];
 
-                let imageUrl = null;
                 let base64Image = null;
+
+                const orderData = {
+                    customer_name: name,
+                    customer_phone: phone,
+                    customer_address: address,
+                    flavor: flavor,
+                    size: size,
+                    message: cakeMsg,
+                    preferred_date: date,
+                    preferred_time: time,
+                    payment_option: payment,
+                    status: 'pending',
+                    host_uid: "YinadrOrLZWzaFpJPOhYoKtrakH3",
+                    image: "",
+                    imageUrl: "",
+                    createdAt: serverTimestamp()
+                };
 
                 if (file) {
                     this.showToast("Processing image...", 'fa-spinner');
                     try {
                         base64Image = await toBase64(file);
+                        orderData.image_landscape = base64Image;
+                        orderData.image_portrait = base64Image;
                         
-                        // Also save to Firestore
-                        await addDoc(collection(db, 'custom_orders'), {
-                            customer_name: name,
-                            customer_phone: phone,
-                            flavor: flavor,
-                            size: size,
-                            message: cakeMsg,
-                            preferred_date: date,
-                            status: 'pending',
-                            host_uid: "YinadrOrLZWzaFpJPOhYoKtrakH3",
-                            image: "",
-                            imageUrl: "",
-                            image_landscape: base64Image,
-                            image_portrait: base64Image,
-                            createdAt: serverTimestamp()
-                        });
-                        
+                        await addDoc(collection(db, 'custom_orders'), orderData);
                         this.showToast("Custom order recorded!", 'fa-check-circle');
                     } catch (error) {
                         console.error('Failed to process custom order image:', error);
                         this.showToast("Could not save image to database.", 'fa-exclamation-circle');
                     }
                 } else {
-                    // Save without image
-                    await addDoc(collection(db, 'custom_orders'), {
-                        customer_name: name,
-                        customer_phone: phone,
-                        flavor: flavor,
-                        size: size,
-                        message: cakeMsg,
-                        preferred_date: date,
-                        status: 'pending',
-                        host_uid: "YinadrOrLZWzaFpJPOhYoKtrakH3",
-                        image: "",
-                        imageUrl: "",
-                        image_landscape: "",
-                        image_portrait: "",
-                        createdAt: serverTimestamp()
-                    });
+                    orderData.image_landscape = "";
+                    orderData.image_portrait = "";
+                    await addDoc(collection(db, 'custom_orders'), orderData);
                 }
 
                 let message = `*Custom Cake Inquiry from Cake Heaven*%0A%0A`;
-                message += `*Customer Details:*%0AName: ${name}%0APhone: ${phone}%0A%0A`;
-                message += `*Cake Details:*%0A- Flavor: ${flavor}%0A- Size: ${size} Kg%0A- Message: ${cakeMsg || 'None'}%0A- Preferred Date: ${date}%0A%0A`;
+                message += `*Customer Details:*%0AName: ${name}%0APhone: ${phone}%0AAddress: ${address}%0A%0A`;
+                message += `*Cake Details:*%0A- Flavor: ${flavor}%0A- Size: ${size} Kg%0A- Message: ${cakeMsg || 'None'}%0A- Preferred Date: ${date} at ${time}%0A- Payment: ${payment}%0A%0A`;
                 
                 if (base64Image) {
                     message += `*Reference Image included in database*%0A%0A`;
@@ -735,13 +744,34 @@ const App = {
         }
     },
 
-    placeOrder() {
+    async placeOrder() {
         const name = document.getElementById('cust_name').value;
         const phone = document.getElementById('cust_phone').value;
         const address = document.getElementById('cust_address').value;
         const date = document.getElementById('del_date').value;
         const time = document.getElementById('del_time').value;
         const payment = document.querySelector('input[name="payment"]:checked')?.value || 'UPI';
+
+        this.showToast("Recording order...", 'fa-spinner');
+
+        try {
+            // Save order to Firestore
+            await addDoc(collection(db, 'orders'), {
+                customer_name: name,
+                customer_phone: phone,
+                customer_address: address,
+                delivery_date: date,
+                delivery_time: time,
+                payment_option: payment,
+                items: this.cart,
+                total: this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
+                status: 'pending',
+                host_uid: "YinadrOrLZWzaFpJPOhYoKtrakH3",
+                createdAt: serverTimestamp()
+            });
+        } catch (error) {
+            console.error('Failed to save order to Firestore:', error);
+        }
 
         let message = `*New Order from Cake Heaven by Priyanka*%0A%0A`;
         message += `*Customer Details:*%0AName: ${name}%0APhone: ${phone}%0AAddress: ${address}%0A%0A`;

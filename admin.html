@@ -531,8 +531,9 @@
             async loadCustomers() {
                 this.setLoading(true);
                 try {
-                    const snapshot = await getDocs(collection(db, 'custom_orders'));
-                    const orders = snapshot.docs.map(doc => doc.data());
+                    const snap1 = await getDocs(collection(db, 'custom_orders'));
+                    const snap2 = await getDocs(collection(db, 'orders'));
+                    const orders = [...snap1.docs.map(d => d.data()), ...snap2.docs.map(d => d.data())];
                     
                     // Group by phone to find unique customers
                     const customerMap = {};
@@ -574,12 +575,13 @@
             async loadOrders() {
                 this.setLoading(true);
                 try {
-                    // Try without orderBy first to see if it's an index issue
-                    const q = query(collection(db, 'custom_orders'));
-                    const snapshot = await getDocs(q);
-                    let orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    const customSnap = await getDocs(collection(db, 'custom_orders'));
+                    const standardSnap = await getDocs(collection(db, 'orders'));
                     
-                    // Sort locally if Firestore index is missing
+                    const customOrders = customSnap.docs.map(doc => ({ id: doc.id, type: 'custom', ...doc.data() }));
+                    const standardOrders = standardSnap.docs.map(doc => ({ id: doc.id, type: 'standard', ...doc.data() }));
+                    
+                    let orders = [...customOrders, ...standardOrders];
                     orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                     
                     this.renderOrders(orders);
@@ -591,11 +593,12 @@
                 }
             },
 
-            async acceptOrder(orderId) {
+            async acceptOrder(orderId, type) {
                 this.setLoading(true);
                 try {
                     const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js");
-                    const orderRef = doc(db, 'custom_orders', orderId);
+                    const collectionName = type === 'custom' ? 'custom_orders' : 'orders';
+                    const orderRef = doc(db, collectionName, orderId);
                     await updateDoc(orderRef, {
                         status: 'accepted'
                     });
@@ -612,32 +615,41 @@
             renderOrders(orders) {
                 const body = document.getElementById('ordersTableBody');
                 if (!orders.length) {
-                    body.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#666;">No custom orders yet.</td></tr>`;
+                    body.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#666;">No orders yet.</td></tr>`;
                     return;
                 }
-                body.innerHTML = orders.map(order => `
-                    <tr>
-                        <td>
-                            <strong>${order.customer_name || 'N/A'}</strong><br>
-                            <small>${order.customer_phone || ''}</small>
-                            <div style="margin-top: 5px;">
-                                <span class="status ${order.status || 'pending'}">${(order.status || 'pending').toUpperCase()}</span>
-                            </div>
-                        </td>
-                        <td>
-                            Flavor: ${order.flavor || 'N/A'}<br>
-                            Size: ${order.size || 0} Kg<br>
-                            Msg: ${order.message || 'None'}
-                        </td>
-                        <td>${order.preferred_date || 'N/A'}</td>
-                        <td>
-                            <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
-                                ${order.image_landscape ? `<img src="${order.image_landscape}" style="width:80px; height:60px; object-fit:cover; border-radius:10px; cursor:pointer;" onclick="window.open('${order.image_landscape}', '_blank')">` : 'No Image'}
-                                ${order.status !== 'accepted' ? `<button onclick="AdminApp.acceptOrder('${order.id}')" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32;">Accept</button>` : ''}
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
+                body.innerHTML = orders.map(order => {
+                    const isCustom = order.type === 'custom';
+                    const details = isCustom 
+                        ? `Flavor: ${order.flavor}<br>Size: ${order.size} Kg<br>Msg: ${order.message || 'None'}`
+                        : (order.items || []).map(i => `${i.name} (x${i.qty})`).join(', ');
+
+                    return `
+                        <tr>
+                            <td>
+                                <strong>${order.customer_name || 'N/A'}</strong><br>
+                                <small>${order.customer_phone || ''}</small><br>
+                                <small style="color:#666;">${order.customer_address || 'No Address'}</small>
+                                <div style="margin-top: 5px;">
+                                    <span class="status ${order.status || 'pending'}">${(order.status || 'pending').toUpperCase()}</span>
+                                    <span style="font-size:0.7rem; background:#eee; padding:2px 5px; border-radius:4px; margin-left:5px;">${order.type.toUpperCase()}</span>
+                                </div>
+                            </td>
+                            <td>
+                                ${details}<br>
+                                <strong style="color:var(--gold);">Total: ₹${order.total || 0}</strong><br>
+                                <small>Payment: ${order.payment_option || 'N/A'}</small>
+                            </td>
+                            <td>${isCustom ? order.preferred_date : order.delivery_date}<br>${isCustom ? (order.preferred_time || '') : (order.delivery_time || '')}</td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                                    ${order.image_landscape ? `<img src="${order.image_landscape}" style="width:80px; height:60px; object-fit:cover; border-radius:10px; cursor:pointer;" onclick="window.open('${order.image_landscape}', '_blank')">` : '<small>No Image</small>'}
+                                    ${order.status !== 'accepted' ? `<button onclick="AdminApp.acceptOrder('${order.id}', '${order.type}')" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32;">Accept</button>` : ''}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             },
 
             async loadProducts() {
@@ -716,10 +728,11 @@
 
             async updateDashboard() {
                 try {
-                    const orderSnap = await getDocs(collection(db, 'custom_orders'));
+                    const customSnap = await getDocs(collection(db, 'custom_orders'));
+                    const standardSnap = await getDocs(collection(db, 'orders'));
                     const productSnap = await getDocs(collection(db, 'products'));
                     
-                    const orderCount = orderSnap.size;
+                    const orderCount = customSnap.size + standardSnap.size;
                     const productCount = productSnap.size;
 
                     document.getElementById('productCount').textContent = productCount;
