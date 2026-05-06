@@ -460,10 +460,36 @@
 
             toBase64(file) {
                 return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
+                    const img = new Image();
+                    img.src = URL.createObjectURL(file);
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Max dimensions for Base64 storage
+                        let width = img.width;
+                        let height = img.height;
+                        const maxSide = 1000; 
+
+                        if (width > maxSide || height > maxSide) {
+                            if (width > height) {
+                                height = (height / width) * maxSide;
+                                width = maxSide;
+                            } else {
+                                width = (width / height) * maxSide;
+                                height = maxSide;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress to JPEG with 0.7 quality to stay under 1MB Firestore limit
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        resolve(dataUrl);
+                    };
+                    img.onerror = reject;
                 });
             },
 
@@ -484,13 +510,36 @@
             async loadOrders() {
                 this.setLoading(true);
                 try {
-                    const q = query(collection(db, 'custom_orders'), orderBy('createdAt', 'desc'));
+                    // Try without orderBy first to see if it's an index issue
+                    const q = query(collection(db, 'custom_orders'));
                     const snapshot = await getDocs(q);
-                    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    let orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                    // Sort locally if Firestore index is missing
+                    orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                    
                     this.renderOrders(orders);
                 } catch (error) {
                     console.error('Unable to load orders', error);
-                    this.showToast('Unable to load orders.', 'fa-exclamation-circle');
+                    this.showToast(`Unable to load orders: ${error.message}`, 'fa-exclamation-circle');
+                } finally {
+                    this.setLoading(false);
+                }
+            },
+
+            async acceptOrder(orderId) {
+                this.setLoading(true);
+                try {
+                    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js");
+                    const orderRef = doc(db, 'custom_orders', orderId);
+                    await updateDoc(orderRef, {
+                        status: 'accepted'
+                    });
+                    this.showToast('Order accepted!', 'fa-check-circle');
+                    this.loadOrders();
+                } catch (error) {
+                    console.error('Failed to accept order', error);
+                    this.showToast('Failed to update order status.', 'fa-exclamation-circle');
                 } finally {
                     this.setLoading(false);
                 }
@@ -507,6 +556,9 @@
                         <td>
                             <strong>${order.customer_name || 'N/A'}</strong><br>
                             <small>${order.customer_phone || ''}</small>
+                            <div style="margin-top: 5px;">
+                                <span class="status ${order.status || 'pending'}">${(order.status || 'pending').toUpperCase()}</span>
+                            </div>
                         </td>
                         <td>
                             Flavor: ${order.flavor || 'N/A'}<br>
@@ -515,7 +567,10 @@
                         </td>
                         <td>${order.preferred_date || 'N/A'}</td>
                         <td>
-                            ${order.image_landscape ? `<img src="${order.image_landscape}" style="width:80px; height:60px; object-fit:cover; border-radius:10px; cursor:pointer;" onclick="window.open('${order.image_landscape}', '_blank')">` : 'No Image'}
+                            <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                                ${order.image_landscape ? `<img src="${order.image_landscape}" style="width:80px; height:60px; object-fit:cover; border-radius:10px; cursor:pointer;" onclick="window.open('${order.image_landscape}', '_blank')">` : 'No Image'}
+                                ${order.status !== 'accepted' ? `<button onclick="AdminApp.acceptOrder('${order.id}')" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32;">Accept</button>` : ''}
+                            </div>
                         </td>
                     </tr>
                 `).join('');
@@ -584,12 +639,12 @@
                     });
 
                     document.getElementById('productForm').reset();
-                    this.showToast('Product uploaded successfully with Base64 storage.', 'fa-check-circle');
+                    this.showToast('Product uploaded successfully.', 'fa-check-circle');
                     document.getElementById('latestStatus').textContent = 'Product added successfully';
                     this.loadProducts();
                 } catch (error) {
                     console.error('Failed to save product', error);
-                    this.showToast('Unable to save product. Check Firebase settings.', 'fa-exclamation-circle');
+                    this.showToast(`Error: ${error.code || error.message}. Check console or rules.`, 'fa-exclamation-circle');
                 } finally {
                     this.setLoading(false);
                 }
