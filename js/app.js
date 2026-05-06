@@ -659,25 +659,34 @@ const App = {
 
                 let imageUrl = null;
                 if (file) {
-                    this.showToast("Uploading image (max 30s)...", 'fa-upload');
+                    this.showToast("Uploading image...", 'fa-upload');
                     try {
-                        // Validate file size (max 5MB)
-                        if (file.size > 5 * 1024 * 1024) {
-                            throw new Error('File size must be less than 5MB');
+                        // Validate file size (max 10MB)
+                        if (file.size > 10 * 1024 * 1024) {
+                            throw new Error('File size must be less than 10MB');
                         }
 
-                        const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-                        const imageRef = ref(storage, `custom_inquiries/${Date.now()}_${sanitizedFileName}`);
-                        
-                        // Upload with timeout
-                        const uploadPromise = uploadBytes(imageRef, file);
+                        // Upload to ImgBB (free image hosting)
+                        const formData = new FormData();
+                        formData.append('image', file);
+
+                        const uploadPromise = fetch('https://api.imgbb.com/1/upload?key=9dd9de93783dd2ca75d7a8f37d39d234', {
+                            method: 'POST',
+                            body: formData
+                        }).then(res => res.json());
+
                         const timeoutPromise = new Promise((_, reject) => 
                             setTimeout(() => reject(new Error('Upload timeout (30s)')), 30000)
                         );
                         
-                        const uploadResult = await Promise.race([uploadPromise, timeoutPromise]);
-                        imageUrl = await getDownloadURL(uploadResult.ref);
-                        this.showToast("Image uploaded successfully!", 'fa-check-circle');
+                        const result = await Promise.race([uploadPromise, timeoutPromise]);
+                        
+                        if (result.success) {
+                            imageUrl = result.data.url;
+                            this.showToast("Image uploaded successfully!", 'fa-check-circle');
+                        } else {
+                            throw new Error('ImgBB upload failed');
+                        }
                     } catch (error) {
                         console.error('Image upload failed:', error.message);
                         this.showToast(`Upload failed: ${error.message}. Sending without image.`, 'fa-exclamation-circle');
