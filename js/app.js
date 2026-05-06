@@ -659,15 +659,28 @@ const App = {
 
                 let imageUrl = null;
                 if (file) {
-                    this.showToast("Uploading image...", 'fa-upload');
+                    this.showToast("Uploading image (max 30s)...", 'fa-upload');
                     try {
-                        const imageRef = ref(storage, `custom_inquiries/${Date.now()}_${file.name}`);
-                        const uploadResult = await uploadBytes(imageRef, file);
+                        // Validate file size (max 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            throw new Error('File size must be less than 5MB');
+                        }
+
+                        const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                        const imageRef = ref(storage, `custom_inquiries/${Date.now()}_${sanitizedFileName}`);
+                        
+                        // Upload with timeout
+                        const uploadPromise = uploadBytes(imageRef, file);
+                        const timeoutPromise = new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Upload timeout (30s)')), 30000)
+                        );
+                        
+                        const uploadResult = await Promise.race([uploadPromise, timeoutPromise]);
                         imageUrl = await getDownloadURL(uploadResult.ref);
                         this.showToast("Image uploaded successfully!", 'fa-check-circle');
                     } catch (error) {
-                        console.error('Image upload failed:', error);
-                        this.showToast("Image upload failed. Sending inquiry without image.", 'fa-exclamation-circle');
+                        console.error('Image upload failed:', error.message);
+                        this.showToast(`Upload failed: ${error.message}. Sending without image.`, 'fa-exclamation-circle');
                     }
                 }
 
