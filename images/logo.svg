@@ -1,0 +1,28 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#D4AF37" stroke-width="2"/>
+  <circle cx="100" cy="100" r="90" fill="none" stroke="#D4AF37" stroke-width="1" stroke-dasharray="5,5"/>
+  
+  <!-- Wings -->
+  <path d="M40 100 Q 20 80 10 110 Q 30 130 50 110" fill="#F8BBD0" opacity="0.6"/>
+  <path d="M160 100 Q 180 80 190 110 Q 170 130 150 110" fill="#F8BBD0" opacity="0.6"/>
+  
+  <!-- Cake Base -->
+  <rect x="70" y="120" width="60" height="40" rx="5" fill="#FCE4EC"/>
+  <rect x="65" y="155" width="70" height="5" rx="2" fill="#D4AF37"/>
+  
+  <!-- Cake Frosting/Topping -->
+  <circle cx="85" cy="120" r="10" fill="#F06292"/>
+  <circle cx="100" cy="115" r="12" fill="#F06292"/>
+  <circle cx="115" cy="120" r="10" fill="#F06292"/>
+  
+  <!-- Halo -->
+  <ellipse cx="100" cy="90" rx="30" ry="8" fill="none" stroke="#D4AF37" stroke-width="3">
+    <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" />
+  </ellipse>
+  
+  <!-- Text -->
+  <text x="100" y="60" font-family="Playfair Display, serif" font-size="20" font-weight="bold" fill="#4E342E" text-anchor="middle">CAKE</text>
+  <text x="100" y="80" font-family="Playfair Display, serif" font-size="24" font-weight="bold" fill="#F06292" text-anchor="middle">Heaven</text>
+  <text x="100" y="180" font-family="Outfit, sans-serif" font-size="12" fill="#D4AF37" text-anchor="middle">BY PRIYANKA</text>
+</svg>
