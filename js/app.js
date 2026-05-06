@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyApHYstsNpEBODGGqoqZG49Icx2WCWthas",
@@ -13,6 +14,7 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
+const storage = getStorage(firebaseApp);
 
 const App = {
     // State
@@ -644,7 +646,7 @@ const App = {
     attachCustomListeners() {
         const form = document.getElementById('customForm');
         if (form) {
-            form.onsubmit = (e) => {
+            form.onsubmit = async (e) => {
                 e.preventDefault();
                 
                 const name = document.getElementById('cust_name_custom').value;
@@ -653,14 +655,28 @@ const App = {
                 const size = document.getElementById('custom_size').value;
                 const cakeMsg = document.getElementById('custom_msg').value;
                 const date = document.getElementById('custom_date').value;
-                const hasImage = document.getElementById('custom_image').files.length > 0;
+                const file = document.getElementById('custom_image').files[0];
+
+                let imageUrl = null;
+                if (file) {
+                    this.showToast("Uploading image...", 'fa-upload');
+                    try {
+                        const imageRef = ref(storage, `custom_inquiries/${Date.now()}_${file.name}`);
+                        const uploadResult = await uploadBytes(imageRef, file);
+                        imageUrl = await getDownloadURL(uploadResult.ref);
+                        this.showToast("Image uploaded successfully!", 'fa-check-circle');
+                    } catch (error) {
+                        console.error('Image upload failed:', error);
+                        this.showToast("Image upload failed. Sending inquiry without image.", 'fa-exclamation-circle');
+                    }
+                }
 
                 let message = `*Custom Cake Inquiry from Cake Heaven*%0A%0A`;
                 message += `*Customer Details:*%0AName: ${name}%0APhone: ${phone}%0A%0A`;
                 message += `*Cake Details:*%0A- Flavor: ${flavor}%0A- Size: ${size} Kg%0A- Message: ${cakeMsg || 'None'}%0A- Preferred Date: ${date}%0A%0A`;
                 
-                if (hasImage) {
-                    message += `*Note:* I have a reference image to share with you!%0A%0A`;
+                if (imageUrl) {
+                    message += `*Reference Image:* ${imageUrl}%0A%0A`;
                 }
                 
                 message += `Please let me know the price and availability!`;
