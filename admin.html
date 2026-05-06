@@ -348,6 +348,26 @@
             </div>
         </div>
 
+        <div id="customersView" class="view-section hide">
+            <div class="card">
+                <h2 style="margin-bottom: 25px;">Customer List</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Phone Number</th>
+                            <th>Total Orders</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody">
+                        <tr>
+                            <td colspan="3" style="text-align:center; color:#666;">No customers found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div id="productsView" class="view-section hide">
             <div class="card">
                 <h2 style="margin-bottom: 25px;">Add New Product</h2>
@@ -505,6 +525,50 @@
                 if (view === 'dashboard') this.updateDashboard();
                 if (view === 'products') this.loadProducts();
                 if (view === 'orders') this.loadOrders();
+                if (view === 'customers') this.loadCustomers();
+            },
+
+            async loadCustomers() {
+                this.setLoading(true);
+                try {
+                    const snapshot = await getDocs(collection(db, 'custom_orders'));
+                    const orders = snapshot.docs.map(doc => doc.data());
+                    
+                    // Group by phone to find unique customers
+                    const customerMap = {};
+                    orders.forEach(order => {
+                        const phone = order.customer_phone || 'Unknown';
+                        if (!customerMap[phone]) {
+                            customerMap[phone] = {
+                                name: order.customer_name || 'N/A',
+                                phone: phone,
+                                count: 0
+                            };
+                        }
+                        customerMap[phone].count++;
+                    });
+
+                    this.renderCustomers(Object.values(customerMap));
+                } catch (error) {
+                    console.error('Unable to load customers', error);
+                } finally {
+                    this.setLoading(false);
+                }
+            },
+
+            renderCustomers(customers) {
+                const body = document.getElementById('customersTableBody');
+                if (!customers.length) {
+                    body.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#666;">No customers yet.</td></tr>`;
+                    return;
+                }
+                body.innerHTML = customers.map(c => `
+                    <tr>
+                        <td><strong>${c.name}</strong></td>
+                        <td>${c.phone}</td>
+                        <td>${c.count}</td>
+                    </tr>
+                `).join('');
             },
 
             async loadOrders() {
@@ -650,9 +714,20 @@
                 }
             },
 
-            updateDashboard() {
-                document.getElementById('productCount').textContent = this.products.length;
-                document.getElementById('statProducts').textContent = this.products.length;
+            async updateDashboard() {
+                try {
+                    const orderSnap = await getDocs(collection(db, 'custom_orders'));
+                    const productSnap = await getDocs(collection(db, 'products'));
+                    
+                    const orderCount = orderSnap.size;
+                    const productCount = productSnap.size;
+
+                    document.getElementById('productCount').textContent = productCount;
+                    document.getElementById('statProducts').textContent = productCount;
+                    document.getElementById('statOrders').textContent = orderCount;
+                } catch (e) {
+                    console.warn("Dashboard stats update failed (check rules)");
+                }
             },
 
             setLoading(active) {
