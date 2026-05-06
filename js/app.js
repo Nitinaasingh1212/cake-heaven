@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
 
 const firebaseConfig = {
@@ -15,6 +15,13 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp);
+
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
 
 const App = {
     // State
@@ -560,7 +567,7 @@ const App = {
                     id: doc.id,
                     name: data.name || 'Untitled Cake',
                     price: Number(data.price) || 0,
-                    image: data.imageUrl || 'https://placehold.co/600x400?text=No+Image',
+                    image: data.image_landscape || data.imageUrl || 'https://placehold.co/600x400?text=No+Image',
                     category
                 };
 
@@ -658,47 +665,58 @@ const App = {
                 const file = document.getElementById('custom_image').files[0];
 
                 let imageUrl = null;
+                let base64Image = null;
+
                 if (file) {
-                    this.showToast("Uploading image...", 'fa-upload');
+                    this.showToast("Processing image...", 'fa-spinner');
                     try {
-                        // Validate file size (max 10MB)
-                        if (file.size > 10 * 1024 * 1024) {
-                            throw new Error('File size must be less than 10MB');
-                        }
-
-                        // Upload to ImgBB (free image hosting)
-                        const formData = new FormData();
-                        formData.append('image', file);
-
-                        const uploadPromise = fetch('https://api.imgbb.com/1/upload?key=9dd9de93783dd2ca75d7a8f37d39d234', {
-                            method: 'POST',
-                            body: formData
-                        }).then(res => res.json());
-
-                        const timeoutPromise = new Promise((_, reject) => 
-                            setTimeout(() => reject(new Error('Upload timeout (30s)')), 30000)
-                        );
+                        base64Image = await toBase64(file);
                         
-                        const result = await Promise.race([uploadPromise, timeoutPromise]);
+                        // Also save to Firestore
+                        await addDoc(collection(db, 'custom_orders'), {
+                            customer_name: name,
+                            customer_phone: phone,
+                            flavor: flavor,
+                            size: size,
+                            message: cakeMsg,
+                            preferred_date: date,
+                            host_uid: "YinadrOrLZWzaFpJPOhYoKtrakH3",
+                            image: "",
+                            imageUrl: "",
+                            image_landscape: base64Image,
+                            image_portrait: base64Image,
+                            createdAt: serverTimestamp()
+                        });
                         
-                        if (result.success) {
-                            imageUrl = result.data.url;
-                            this.showToast("Image uploaded successfully!", 'fa-check-circle');
-                        } else {
-                            throw new Error('ImgBB upload failed');
-                        }
+                        this.showToast("Custom order recorded!", 'fa-check-circle');
                     } catch (error) {
-                        console.error('Image upload failed:', error.message);
-                        this.showToast(`Upload failed: ${error.message}. Sending without image.`, 'fa-exclamation-circle');
+                        console.error('Failed to process custom order image:', error);
+                        this.showToast("Could not save image to database.", 'fa-exclamation-circle');
                     }
+                } else {
+                    // Save without image
+                    await addDoc(collection(db, 'custom_orders'), {
+                        customer_name: name,
+                        customer_phone: phone,
+                        flavor: flavor,
+                        size: size,
+                        message: cakeMsg,
+                        preferred_date: date,
+                        host_uid: "YinadrOrLZWzaFpJPOhYoKtrakH3",
+                        image: "",
+                        imageUrl: "",
+                        image_landscape: "",
+                        image_portrait: "",
+                        createdAt: serverTimestamp()
+                    });
                 }
 
                 let message = `*Custom Cake Inquiry from Cake Heaven*%0A%0A`;
                 message += `*Customer Details:*%0AName: ${name}%0APhone: ${phone}%0A%0A`;
                 message += `*Cake Details:*%0A- Flavor: ${flavor}%0A- Size: ${size} Kg%0A- Message: ${cakeMsg || 'None'}%0A- Preferred Date: ${date}%0A%0A`;
                 
-                if (imageUrl) {
-                    message += `*Reference Image:* ${imageUrl}%0A%0A`;
+                if (base64Image) {
+                    message += `*Reference Image included in database*%0A%0A`;
                 }
                 
                 message += `Please let me know the price and availability!`;
