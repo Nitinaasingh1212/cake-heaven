@@ -719,6 +719,7 @@ const App = {
                     message += `*Reference Image included in database*%0A%0A`;
                 }
                 
+                message += `*Order Link:* https://cakeheavenlucknow.com/admin%0A%0A`;
                 message += `Please let me know the price and availability!`;
 
                 const whatsappUrl = `https://wa.me/918796343915?text=${message}`;
@@ -753,6 +754,7 @@ const App = {
         message += `%0A*Total Amount:* ₹${total}%0A`;
         message += `*Delivery:* ${date} at ${time}%0A`;
         message += `*Payment:* ${payment}%0A%0A`;
+        message += `*Order Link:* https://cakeheavenlucknow.com/admin%0A%0A`;
         message += `Please confirm my order!`;
 
         const whatsappUrl = `https://wa.me/918796343915?text=${message}`;

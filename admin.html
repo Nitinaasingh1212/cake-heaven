@@ -327,6 +327,27 @@
             </div>
         </div>
 
+        <div id="ordersView" class="view-section hide">
+            <div class="card">
+                <h2 style="margin-bottom: 25px;">Custom Inquiries & Orders</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Details</th>
+                            <th>Date</th>
+                            <th>Image</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <tr>
+                            <td colspan="4" style="text-align:center; color:#666;">Loading orders...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div id="productsView" class="view-section hide">
             <div class="card">
                 <h2 style="margin-bottom: 25px;">Add New Product</h2>
@@ -457,6 +478,47 @@
                 document.getElementById('pageTitle').textContent = view === 'dashboard' ? 'Dashboard Overview' : 'Product Manager';
                 if (view === 'dashboard') this.updateDashboard();
                 if (view === 'products') this.loadProducts();
+                if (view === 'orders') this.loadOrders();
+            },
+
+            async loadOrders() {
+                this.setLoading(true);
+                try {
+                    const q = query(collection(db, 'custom_orders'), orderBy('createdAt', 'desc'));
+                    const snapshot = await getDocs(q);
+                    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    this.renderOrders(orders);
+                } catch (error) {
+                    console.error('Unable to load orders', error);
+                    this.showToast('Unable to load orders.', 'fa-exclamation-circle');
+                } finally {
+                    this.setLoading(false);
+                }
+            },
+
+            renderOrders(orders) {
+                const body = document.getElementById('ordersTableBody');
+                if (!orders.length) {
+                    body.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#666;">No custom orders yet.</td></tr>`;
+                    return;
+                }
+                body.innerHTML = orders.map(order => `
+                    <tr>
+                        <td>
+                            <strong>${order.customer_name || 'N/A'}</strong><br>
+                            <small>${order.customer_phone || ''}</small>
+                        </td>
+                        <td>
+                            Flavor: ${order.flavor || 'N/A'}<br>
+                            Size: ${order.size || 0} Kg<br>
+                            Msg: ${order.message || 'None'}
+                        </td>
+                        <td>${order.preferred_date || 'N/A'}</td>
+                        <td>
+                            ${order.image_landscape ? `<img src="${order.image_landscape}" style="width:80px; height:60px; object-fit:cover; border-radius:10px; cursor:pointer;" onclick="window.open('${order.image_landscape}', '_blank')">` : 'No Image'}
+                        </td>
+                    </tr>
+                `).join('');
             },
 
             async loadProducts() {
