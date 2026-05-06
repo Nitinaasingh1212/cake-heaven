@@ -528,6 +528,26 @@
                 if (view === 'customers') this.loadCustomers();
             },
 
+            async updateOrderStatus(orderId, type, newStatus) {
+                this.setLoading(true);
+                try {
+                    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js");
+                    const collectionName = type === 'custom' ? 'custom_orders' : 'orders';
+                    const orderRef = doc(db, collectionName, orderId);
+                    await updateDoc(orderRef, {
+                        status: newStatus
+                    });
+                    this.showToast(`Order ${newStatus}!`, 'fa-check-circle');
+                    this.loadOrders();
+                    this.updateDashboard();
+                } catch (error) {
+                    console.error('Failed to update order status', error);
+                    this.showToast('Failed to update order status.', 'fa-exclamation-circle');
+                } finally {
+                    this.setLoading(false);
+                }
+            },
+
             async loadCustomers() {
                 this.setLoading(true);
                 try {
@@ -593,25 +613,6 @@
                 }
             },
 
-            async acceptOrder(orderId, type) {
-                this.setLoading(true);
-                try {
-                    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js");
-                    const collectionName = type === 'custom' ? 'custom_orders' : 'orders';
-                    const orderRef = doc(db, collectionName, orderId);
-                    await updateDoc(orderRef, {
-                        status: 'accepted'
-                    });
-                    this.showToast('Order accepted!', 'fa-check-circle');
-                    this.loadOrders();
-                } catch (error) {
-                    console.error('Failed to accept order', error);
-                    this.showToast('Failed to update order status.', 'fa-exclamation-circle');
-                } finally {
-                    this.setLoading(false);
-                }
-            },
-
             renderOrders(orders) {
                 const body = document.getElementById('ordersTableBody');
                 if (!orders.length) {
@@ -624,6 +625,20 @@
                         ? `Flavor: ${order.flavor}<br>Size: ${order.size} Kg<br>Msg: ${order.message || 'None'}`
                         : (order.items || []).map(i => `${i.name} (x${i.qty})`).join(', ');
 
+                    const status = order.status || 'pending';
+                    let buttons = '';
+                    
+                    if (status === 'pending') {
+                        buttons = `
+                            <button onclick="AdminApp.updateOrderStatus('${order.id}', '${order.type}', 'accepted')" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32; margin-bottom:5px; width:100%;">Accept</button>
+                            <button onclick="AdminApp.updateOrderStatus('${order.id}', '${order.type}', 'declined')" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #d32f2f; width:100%;">Decline</button>
+                        `;
+                    } else if (status === 'accepted') {
+                        buttons = `
+                            <button onclick="AdminApp.updateOrderStatus('${order.id}', '${order.type}', 'delivered')" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #fb8c00; width:100%;">Mark Delivered</button>
+                        `;
+                    }
+
                     return `
                         <tr>
                             <td>
@@ -631,20 +646,20 @@
                                 <small>${order.customer_phone || ''}</small><br>
                                 <small style="color:#666;">${order.customer_address || 'No Address'}</small>
                                 <div style="margin-top: 5px;">
-                                    <span class="status ${order.status || 'pending'}">${(order.status || 'pending').toUpperCase()}</span>
+                                    <span class="status ${status}">${status.toUpperCase()}</span>
                                     <span style="font-size:0.7rem; background:#eee; padding:2px 5px; border-radius:4px; margin-left:5px;">${order.type.toUpperCase()}</span>
                                 </div>
                             </td>
                             <td>
                                 ${details}<br>
-                                <strong style="color:var(--gold);">Total: ₹${order.total || 0}</strong><br>
+                                <strong style="color:var(--gold);">Total: ₹${order.total || 'Negotiable'}</strong><br>
                                 <small>Payment: ${order.payment_option || 'N/A'}</small>
                             </td>
                             <td>${isCustom ? order.preferred_date : order.delivery_date}<br>${isCustom ? (order.preferred_time || '') : (order.delivery_time || '')}</td>
                             <td>
-                                <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
-                                    ${order.image_landscape ? `<img src="${order.image_landscape}" style="width:80px; height:60px; object-fit:cover; border-radius:10px; cursor:pointer;" onclick="window.open('${order.image_landscape}', '_blank')">` : '<small>No Image</small>'}
-                                    ${order.status !== 'accepted' ? `<button onclick="AdminApp.acceptOrder('${order.id}', '${order.type}')" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32;">Accept</button>` : ''}
+                                <div style="display: flex; flex-direction: column; gap: 10px; align-items: center; width:120px;">
+                                    ${order.image_landscape ? `<img src="${order.image_landscape}" style="width:80px; height:60px; object-fit:cover; border-radius:10px; cursor:pointer; margin-bottom:5px;" onclick="window.open('${order.image_landscape}', '_blank')">` : '<small>No Image</small>'}
+                                    ${buttons}
                                 </div>
                             </td>
                         </tr>
@@ -755,6 +770,9 @@
                 setTimeout(() => toast.remove(), 3200);
             }
         };
+
+        // Expose AdminApp to window for onclick handlers
+        window.AdminApp = AdminApp;
 
         AdminApp.init();
     </script>

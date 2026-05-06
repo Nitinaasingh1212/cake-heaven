@@ -329,9 +329,15 @@ const App = {
                                         <input type="number" id="custom_size" step="0.5" min="0.5" placeholder="e.g. 1.5" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Message on Cake</label>
-                                    <input type="text" id="custom_msg" placeholder="Happy Birthday..." style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Message on Cake</label>
+                                        <input type="text" id="custom_msg" placeholder="Happy Birthday..." style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Budget/Total (Optional)</label>
+                                        <input type="number" id="custom_total" placeholder="e.g. 1500" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Delivery Address</label>
@@ -415,6 +421,7 @@ const App = {
                                         <input type="date" id="del_date" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
                                         <input type="time" id="del_time" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
                                     </div>
+                                    <input type="text" id="del_msg" placeholder="Message on Cake (Optional)" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
                                     <div style="margin: 10px 0;">
                                         <label style="display: block; margin-bottom: 10px; font-weight: 600;">Payment Option</label>
                                         <div style="display: flex; gap: 15px;">
@@ -678,6 +685,7 @@ const App = {
                 const flavor = document.getElementById('custom_flavor').value;
                 const size = document.getElementById('custom_size').value;
                 const cakeMsg = document.getElementById('custom_msg').value;
+                const customTotal = document.getElementById('custom_total').value || 0;
                 const date = document.getElementById('custom_date').value;
                 const time = document.getElementById('custom_time').value;
                 const address = document.getElementById('custom_address').value;
@@ -693,6 +701,7 @@ const App = {
                     flavor: flavor,
                     size: size,
                     message: cakeMsg,
+                    total: Number(customTotal),
                     preferred_date: date,
                     preferred_time: time,
                     payment_option: payment,
@@ -750,6 +759,7 @@ const App = {
         const address = document.getElementById('cust_address').value;
         const date = document.getElementById('del_date').value;
         const time = document.getElementById('del_time').value;
+        const msg = document.getElementById('del_msg').value;
         const payment = document.querySelector('input[name="payment"]:checked')?.value || 'UPI';
 
         this.showToast("Recording order...", 'fa-spinner');
@@ -762,6 +772,7 @@ const App = {
                 customer_address: address,
                 delivery_date: date,
                 delivery_time: time,
+                message: msg,
                 payment_option: payment,
                 items: this.cart,
                 total: this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
@@ -775,6 +786,7 @@ const App = {
 
         let message = `*New Order from Cake Heaven by Priyanka*%0A%0A`;
         message += `*Customer Details:*%0AName: ${name}%0APhone: ${phone}%0AAddress: ${address}%0A%0A`;
+        message += `*Message on Cake:* ${msg || 'None'}%0A%0A`;
         message += `*Order Items:*%0A`;
         
         let total = 0;
