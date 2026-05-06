@@ -191,8 +191,54 @@
             transition: border-color 0.3s;
         }
         .file-upload-wrapper:hover { border-color: var(--primary); background: #fdf2f2; }
-        .file-upload-wrapper i { font-size: 2rem; color: #666; margin-bottom: 10px; }
-        .file-upload-wrapper input { display: none; }
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+        .close-modal {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+        }
+
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            align-items: center;
+        }
+        .btn-page {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-page:hover:not(:disabled) { background: var(--primary); color: white; border-color: var(--primary); }
 
         .btn-add {
             background: var(--primary);
@@ -382,6 +428,7 @@
                         </tr>
                     </tbody>
                 </table>
+                <div class="pagination" id="ordersPagination"></div>
             </div>
         </div>
 
@@ -464,6 +511,7 @@
                         </tr>
                     </tbody>
                 </table>
+                <div class="pagination" id="productsPagination"></div>
             </div>
         </div>
 
@@ -493,6 +541,12 @@
         </div>
     </div>
 
+    <div id="imageModal" class="modal">
+        <span class="close-modal" onclick="document.getElementById('imageModal').classList.remove('active')">&times;</span>
+        <img id="modalImg" class="modal-content">
+        <p id="modalCaption" style="color:white; margin-top:20px; font-weight:600;"></p>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
@@ -514,8 +568,11 @@
         const productsCollection = collection(db, 'products');
 
         const AdminApp = {
-            currentView: 'dashboard',
             products: [],
+            orders: [],
+            orderPage: 1,
+            productPage: 1,
+            itemsPerPage: 5,
 
             init() {
                 this.attachNavListeners();
@@ -523,8 +580,35 @@
                 this.attachOrderActionListeners();
                 this.attachProductActionListeners();
                 this.attachSettingsListener();
+                this.attachPaginationListeners();
                 this.setView('dashboard');
                 this.loadProducts();
+            },
+
+            attachPaginationListeners() {
+                document.getElementById('ordersPagination').addEventListener('click', (e) => {
+                    const btn = e.target.closest('button');
+                    if (btn && btn.dataset.page) {
+                        this.orderPage = parseInt(btn.dataset.page);
+                        this.renderOrders(this.orders);
+                    }
+                });
+                document.getElementById('productsPagination').addEventListener('click', (e) => {
+                    const btn = e.target.closest('button');
+                    if (btn && btn.dataset.page) {
+                        this.productPage = parseInt(btn.dataset.page);
+                        this.renderProducts();
+                    }
+                });
+            },
+
+            openImageModal(src, caption) {
+                const modal = document.getElementById('imageModal');
+                const img = document.getElementById('modalImg');
+                const cap = document.getElementById('modalCaption');
+                img.src = src;
+                cap.textContent = caption;
+                modal.classList.add('active');
             },
 
             attachOrderActionListeners() {
@@ -716,10 +800,11 @@
                     const customOrders = customSnap.docs.map(doc => ({ id: doc.id, type: 'custom', ...doc.data() }));
                     const standardOrders = standardSnap.docs.map(doc => ({ id: doc.id, type: 'standard', ...doc.data() }));
                     
-                    let orders = [...customOrders, ...standardOrders];
-                    orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                    this.orders = [...customOrders, ...standardOrders];
+                    this.orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                     
-                    this.renderOrders(orders);
+                    this.orderPage = 1;
+                    this.renderOrders(this.orders);
                 } catch (error) {
                     console.error('Unable to load orders', error);
                     this.showToast(`Unable to load orders: ${error.message}`, 'fa-exclamation-circle');
@@ -730,11 +815,18 @@
 
             renderOrders(orders) {
                 const body = document.getElementById('ordersTableBody');
+                const pagEl = document.getElementById('ordersPagination');
+                
                 if (!orders.length) {
                     body.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#666;">No orders yet.</td></tr>`;
+                    pagEl.innerHTML = '';
                     return;
                 }
-                body.innerHTML = orders.map(order => {
+
+                const start = (this.orderPage - 1) * this.itemsPerPage;
+                const paginated = orders.slice(start, start + this.itemsPerPage);
+
+                body.innerHTML = paginated.map(order => {
                     const isCustom = order.type === 'custom';
                     const details = isCustom 
                         ? `Flavor: ${order.flavor}<br>Size: ${order.size} Kg<br>Msg: ${order.message || 'None'}`
@@ -754,6 +846,11 @@
                         `;
                     }
 
+                    const imgSrc = order.image_landscape || order.image_portrait || "";
+                    const imgHtml = imgSrc 
+                        ? `<img src="${imgSrc}" class="product-img-admin" style="cursor:zoom-in;" onclick="AdminApp.openImageModal('${imgSrc}', 'Order for ${order.customer_name}')">` 
+                        : '<small>No Image</small>';
+
                     return `
                         <tr>
                             <td>
@@ -769,17 +866,34 @@
                                 ${details}<br>
                                 <strong style="color:var(--gold);">Total: ₹${order.total || 'Negotiable'}</strong><br>
                                 <small>Payment: ${order.payment_option || 'N/A'}</small>
+                                <br><small>Msg: ${order.message || 'None'}</small>
                             </td>
                             <td>${isCustom ? order.preferred_date : order.delivery_date}<br>${isCustom ? (order.preferred_time || '') : (order.delivery_time || '')}</td>
                             <td>
                                 <div style="display: flex; flex-direction: column; gap: 10px; align-items: center; width:120px;">
-                                    ${order.image_landscape ? `<img src="${order.image_landscape}" style="width:80px; height:60px; object-fit:cover; border-radius:10px; cursor:pointer; margin-bottom:5px;" onclick="window.open('${order.image_landscape}', '_blank')">` : '<small>No Image</small>'}
+                                    ${imgHtml}
                                     ${buttons}
                                 </div>
                             </td>
                         </tr>
                     `;
                 }).join('');
+
+                this.renderPagination(pagEl, orders.length, this.orderPage, 'order');
+            },
+
+            renderPagination(el, totalItems, currentPage, type) {
+                const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+                if (totalPages <= 1) {
+                    el.innerHTML = '';
+                    return;
+                }
+                let html = `
+                    <button class="btn-page" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span>Page ${currentPage} of ${totalPages}</span>
+                    <button class="btn-page" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}"><i class="fa-solid fa-chevron-right"></i></button>
+                `;
+                el.innerHTML = html;
             },
 
             async loadProducts() {
@@ -800,19 +914,28 @@
 
             renderProducts() {
                 const body = document.getElementById('productsTableBody');
+                const pagEl = document.getElementById('productsPagination');
+
                 if (!this.products.length) {
-                    body.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#666;">No products available.</td></tr>`;
+                    body.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#666;">No products yet.</td></tr>`;
+                    pagEl.innerHTML = '';
                     return;
                 }
-                body.innerHTML = this.products.map(product => `
+
+                const start = (this.productPage - 1) * this.itemsPerPage;
+                const paginated = this.products.slice(start, start + this.itemsPerPage);
+
+                body.innerHTML = paginated.map(product => `
                     <tr>
                         <td>${product.name || 'Untitled'}</td>
                         <td>${product.category || 'regular'}</td>
                         <td>₹${Number(product.price || 0).toFixed(0)}</td>
-                        <td><img src="${product.image_landscape || product.imageUrl || ''}" class="product-img-admin" alt="${product.name || ''}"></td>
+                        <td><img src="${product.image_landscape || product.imageUrl || ''}" class="product-img-admin" style="cursor:zoom-in;" onclick="AdminApp.openImageModal('${product.image_landscape || product.imageUrl}', '${product.name}')"></td>
                         <td><button class="btn-delete" data-id="${product.id}"><i class="fa-solid fa-trash"></i></button></td>
                     </tr>
                 `).join('');
+
+                this.renderPagination(pagEl, this.products.length, this.productPage, 'product');
             },
 
             async handleProductSubmit(event) {
