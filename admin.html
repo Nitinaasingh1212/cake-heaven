@@ -156,6 +156,43 @@
 
         .status.pending { background: #FFF3E0; color: #EF6C00; }
         .status.completed { background: #E8F5E9; color: #2E7D32; }
+        .status.delivered { background: #E8F5E9; color: #2E7D32; }
+        .status.declined { background: #FFEBEE; color: #C62828; }
+
+        .btn-delete {
+            background: #FFEBEE;
+            color: #C62828;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-delete:hover { background: #FFCDD2; transform: scale(1.1); }
+
+        /* Responsive image fixes */
+        img { max-width: 100%; height: auto; }
+        .product-img-admin {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        .product-img-admin:hover { transform: scale(1.5); z-index: 10; position: relative; }
+
+        /* Better Upload Button */
+        .file-upload-wrapper {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .file-upload-wrapper:hover { border-color: var(--primary); background: #fdf2f2; }
+        .file-upload-wrapper i { font-size: 2rem; color: #666; margin-bottom: 10px; }
+        .file-upload-wrapper input { display: none; }
 
         .btn-add {
             background: var(--primary);
@@ -394,36 +431,59 @@
                         </div>
                         <div class="form-group">
                             <label for="productImage">Product Image</label>
-                            <input id="productImage" type="file" accept="image/*" required>
+                            <div class="file-upload-wrapper" onclick="document.getElementById('productImage').click()">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <p id="uploadText">Click to upload image</p>
+                                <input id="productImage" type="file" accept="image/*" required onchange="document.getElementById('uploadText').textContent = this.files[0].name">
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="productDescription">Description</label>
                         <textarea id="productDescription" rows="4" placeholder="Short product description"></textarea>
                     </div>
-                    <button type="submit">Upload Product</button>
+                    <button type="submit" class="btn-add">Upload Product</button>
                 </form>
             </div>
 
             <div class="card">
                 <h2 style="margin-bottom: 25px;">Product List</h2>
-                <table>
+                <table>                    
                     <thead>
                         <tr>
-                            <th>Product Name</th>
+                            <th>Product</th>
                             <th>Category</th>
                             <th>Price</th>
                             <th>Image</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="productsTableBody">
                         <tr>
-                            <td colspan="4" style="text-align:center; color:#666;">Loading products...</td>
+                            <td colspan="5" style="text-align:center; color:#666;">Loading products...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <div id="settingsView" class="view-section hide">
+            <div class="card">
+                <h2 style="margin-bottom: 25px;">Store Settings</h2>
+                <form id="settingsForm" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="form-group">
+                        <label>Store Name</label>
+                        <input type="text" id="storeName" value="Cake Heaven by Priyanka" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+                    </div>
+                    <div class="form-group">
+                        <label>WhatsApp Number (with Country Code)</label>
+                        <input type="text" id="storePhone" value="918796343915" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+                    </div>
+                    <button type="submit" class="btn-add" style="width: 200px;">Save Settings</button>
+                </form>
+            </div>
+        </div>
+
     </div>
 
     <div id="loadingOverlay" class="loading-overlay">
@@ -461,6 +521,7 @@
                 this.attachNavListeners();
                 this.attachFormListener();
                 this.attachOrderActionListeners();
+                this.attachProductActionListeners();
                 this.setView('dashboard');
                 this.loadProducts();
             },
@@ -477,6 +538,19 @@
 
                     if (id && type && action) {
                         this.updateOrderStatus(id, type, action);
+                    }
+                });
+            },
+
+            attachProductActionListeners() {
+                const body = document.getElementById('productsTableBody');
+                body.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.btn-delete');
+                    if (!btn) return;
+
+                    const id = btn.getAttribute('data-id');
+                    if (id && confirm('Are you sure you want to delete this product?')) {
+                        this.deleteProduct(id);
                     }
                 });
             },
@@ -560,6 +634,21 @@
                 } catch (error) {
                     console.error('Failed to update order status', error);
                     this.showToast('Failed to update order status.', 'fa-exclamation-circle');
+                } finally {
+                    this.setLoading(false);
+                }
+            },
+
+            async deleteProduct(productId) {
+                this.setLoading(true);
+                try {
+                    const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js");
+                    await deleteDoc(doc(db, 'products', productId));
+                    this.showToast('Product deleted!', 'fa-trash');
+                    this.loadProducts();
+                    this.updateDashboard();
+                } catch (error) {
+                    console.error('Delete failed', error);
                 } finally {
                     this.setLoading(false);
                 }
@@ -711,7 +800,8 @@
                         <td>${product.name || 'Untitled'}</td>
                         <td>${product.category || 'regular'}</td>
                         <td>₹${Number(product.price || 0).toFixed(0)}</td>
-                        <td><img src="${product.image_landscape || product.imageUrl || ''}" alt="${product.name || ''}" style="width:80px; height:60px; object-fit:cover; border-radius: 10px;"></td>
+                        <td><img src="${product.image_landscape || product.imageUrl || ''}" class="product-img-admin" alt="${product.name || ''}"></td>
+                        <td><button class="btn-delete" data-id="${product.id}"><i class="fa-solid fa-trash"></i></button></td>
                     </tr>
                 `).join('');
             },
@@ -764,14 +854,25 @@
                     const standardSnap = await getDocs(collection(db, 'orders'));
                     const productSnap = await getDocs(collection(db, 'products'));
                     
-                    const orderCount = customSnap.size + standardSnap.size;
+                    const orders = [...customSnap.docs.map(d => d.data()), ...standardSnap.docs.map(d => d.data())];
                     const productCount = productSnap.size;
+
+                    // Dynamic Stats
+                    const deliveredOrders = orders.filter(o => o.status === 'delivered');
+                    const totalSales = deliveredOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+                    const pendingOrders = orders.filter(o => o.status === 'pending').length;
 
                     document.getElementById('productCount').textContent = productCount;
                     document.getElementById('statProducts').textContent = productCount;
-                    document.getElementById('statOrders').textContent = orderCount;
+                    document.getElementById('statOrders').textContent = pendingOrders;
+                    
+                    // Add/Update Total Sales element if needed, or use existing ones
+                    // Assuming statCustomers or another block could show Sales
+                    const salesEl = document.querySelector('.card:nth-child(2) .stat-val'); 
+                    if (salesEl) salesEl.textContent = `₹${totalSales.toLocaleString()}`;
+
                 } catch (e) {
-                    console.warn("Dashboard stats update failed (check rules)");
+                    console.warn("Dashboard stats update failed", e);
                 }
             },
 
