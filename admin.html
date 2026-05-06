@@ -460,8 +460,25 @@
             init() {
                 this.attachNavListeners();
                 this.attachFormListener();
+                this.attachOrderActionListeners();
                 this.setView('dashboard');
                 this.loadProducts();
+            },
+
+            attachOrderActionListeners() {
+                const body = document.getElementById('ordersTableBody');
+                body.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button');
+                    if (!btn) return;
+
+                    const id = btn.getAttribute('data-id');
+                    const type = btn.getAttribute('data-type');
+                    const action = btn.getAttribute('data-action');
+
+                    if (id && type && action) {
+                        this.updateOrderStatus(id, type, action);
+                    }
+                });
             },
 
             attachNavListeners() {
@@ -630,12 +647,12 @@
                     
                     if (status === 'pending') {
                         buttons = `
-                            <button onclick="AdminApp.updateOrderStatus('${order.id}', '${order.type}', 'accepted')" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32; margin-bottom:5px; width:100%;">Accept</button>
-                            <button onclick="AdminApp.updateOrderStatus('${order.id}', '${order.type}', 'declined')" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #d32f2f; width:100%;">Decline</button>
+                            <button data-id="${order.id}" data-type="${order.type}" data-action="accepted" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32; margin-bottom:5px; width:100%;">Accept</button>
+                            <button data-id="${order.id}" data-type="${order.type}" data-action="declined" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #d32f2f; width:100%;">Decline</button>
                         `;
                     } else if (status === 'accepted') {
                         buttons = `
-                            <button onclick="AdminApp.updateOrderStatus('${order.id}', '${order.type}', 'delivered')" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #fb8c00; width:100%;">Mark Delivered</button>
+                            <button data-id="${order.id}" data-type="${order.type}" data-action="delivered" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #fb8c00; width:100%;">Mark Delivered</button>
                         `;
                     }
 
