@@ -576,6 +576,7 @@
                         <label for="productDescription">Description</label>
                         <textarea id="productDescription" rows="4" placeholder="Short product description"></textarea>
                     </div>
+                    <div id="productUploadError" style="color:#b71c1c; margin-bottom:10px; display:none; font-weight:600;"></div>
                     <button type="submit" class="btn-add">Upload Product</button>
                 </form>
             </div>
@@ -1174,11 +1175,19 @@
                     document.getElementById('productForm').reset();
                     this.showToast('Product successfully added!', 'fa-check-circle');
                     document.getElementById('latestStatus').textContent = 'Product added successfully';
+                    // clear any previous error
+                    const errEl = document.getElementById('productUploadError');
+                    if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
                     await this.loadProducts();
 
                 } catch (error) {
                     console.error('Failed to save product', error);
                     this.showToast(error.message || 'Failed to save product', 'fa-exclamation-circle');
+                    const errEl = document.getElementById('productUploadError');
+                    if (errEl) {
+                        errEl.style.display = 'block';
+                        errEl.textContent = (error && error.message) ? error.message : String(error);
+                    }
                 } finally {
                     console.log("Submission process finished.");
                     this.setLoading(false);
