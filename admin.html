@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Cake Heaven by Priyanka</title>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
             --primary: #F06292;
@@ -21,7 +24,7 @@
             --dark: #2D2D2D;
             --bg: #F8F9FA;
             --white: #ffffff;
-            --shadow: 0 10px 30px rgba(0,0,0,0.05);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
 
         * {
@@ -74,7 +77,8 @@
             text-decoration: none;
         }
 
-        .nav-item:hover, .nav-item.active {
+        .nav-item:hover,
+        .nav-item.active {
             background: var(--secondary);
             color: var(--primary);
         }
@@ -154,10 +158,25 @@
             font-weight: 600;
         }
 
-        .status.pending { background: #FFF3E0; color: #EF6C00; }
-        .status.completed { background: #E8F5E9; color: #2E7D32; }
-        .status.delivered { background: #E8F5E9; color: #2E7D32; }
-        .status.declined { background: #FFEBEE; color: #C62828; }
+        .status.pending {
+            background: #FFF3E0;
+            color: #EF6C00;
+        }
+
+        .status.completed {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status.delivered {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status.declined {
+            background: #FFEBEE;
+            color: #C62828;
+        }
 
         .btn-delete {
             background: #FFEBEE;
@@ -168,10 +187,18 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .btn-delete:hover { background: #FFCDD2; transform: scale(1.1); }
+
+        .btn-delete:hover {
+            background: #FFCDD2;
+            transform: scale(1.1);
+        }
 
         /* Responsive image fixes */
-        img { max-width: 100%; height: auto; }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
         .product-img-admin {
             width: 80px;
             height: 60px;
@@ -179,7 +206,12 @@
             border-radius: 10px;
             transition: transform 0.3s;
         }
-        .product-img-admin:hover { transform: scale(1.5); z-index: 10; position: relative; }
+
+        .product-img-admin:hover {
+            transform: scale(1.5);
+            z-index: 10;
+            position: relative;
+        }
 
         /* Better Upload Button */
         .file-upload-wrapper {
@@ -190,7 +222,12 @@
             cursor: pointer;
             transition: border-color 0.3s;
         }
-        .file-upload-wrapper:hover { border-color: var(--primary); background: #fdf2f2; }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--primary);
+            background: #fdf2f2;
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -205,13 +242,18 @@
             align-items: center;
             flex-direction: column;
         }
-        .modal.active { display: flex; }
+
+        .modal.active {
+            display: flex;
+        }
+
         .modal-content {
             max-width: 90%;
             max-height: 80%;
             border-radius: 15px;
-            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
         }
+
         .close-modal {
             position: absolute;
             top: 30px;
@@ -229,6 +271,7 @@
             margin-top: 25px;
             align-items: center;
         }
+
         .btn-page {
             background: white;
             border: 1px solid #ddd;
@@ -237,8 +280,17 @@
             cursor: pointer;
             font-weight: 600;
         }
-        .btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-page:hover:not(:disabled) { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .btn-page:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-page:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
 
         /* Mobile Responsiveness */
         .mobile-header {
@@ -252,8 +304,9 @@
             z-index: 1000;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .menu-btn {
             background: none;
             border: none;
@@ -268,34 +321,31 @@
                 transition: transform 0.3s ease;
                 z-index: 1001;
             }
+
             .sidebar.active {
                 transform: translateX(0);
             }
+
             .main-content {
                 margin-left: 0;
-                width: 100%; /* ensure content uses full width on small screens */
                 padding: 80px 20px 20px;
             }
-            /* Make sidebar overlay content when active */
-            .sidebar {
-                position: fixed;
-                left: 0;
-                top: 0;
-                height: 100vh;
-            }
+
             .mobile-header {
                 display: flex;
             }
+
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
             .card {
                 overflow-x: auto;
             }
-            /* Allow tables to wrap on small screens instead of forcing horizontal scroll */
+
+            /* Let tables scroll on tablets, but don't break layout */
             table {
-                min-width: 100%;
-                width: 100%;
+                min-width: 600px;
             }
         }
 
@@ -303,15 +353,86 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+
+            .main-content {
+                padding: 72px 14px 18px;
+            }
+
+            header {
+                margin-bottom: 20px;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            table {
+                min-width: 0 !important;
+                width: 100%;
+            }
+
+
+            /* Make tables usable on phones without forcing giant min-width */
+            .card table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            th,
+            td {
+                padding: 12px 10px;
+                font-size: 0.95rem;
+            }
+
+            th {
+                font-size: 0.92rem;
+            }
+
+            .product-img-admin {
+                width: 68px;
+                height: 52px;
+            }
+
+            .stat-card {
+                padding: 18px;
+                gap: 14px;
+            }
+
+            .stat-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 1.05rem;
+            }
+
             .modal-content {
                 max-width: 95%;
             }
+
             .close-modal {
                 top: 20px;
                 right: 20px;
                 font-size: 2rem;
             }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .btn-add {
+                width: 100%;
+            }
+
+            .toast {
+                left: 12px;
+                right: 12px;
+                width: auto;
+                bottom: 18px;
+            }
         }
+
 
         .btn-add {
             background: var(--primary);
@@ -396,11 +517,19 @@
         }
 
         @keyframes slideIn {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="mobile-header">
@@ -416,7 +545,8 @@
             Cake Heaven
         </div>
         <ul class="nav-menu">
-            <a href="#" class="nav-item active" data-view="dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+            <a href="#" class="nav-item active" data-view="dashboard"><i class="fa-solid fa-chart-line"></i>
+                Dashboard</a>
             <a href="#" class="nav-item" data-view="products"><i class="fa-solid fa-box"></i> Products</a>
             <a href="#" class="nav-item" data-view="orders"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
             <a href="#" class="nav-item" data-view="customers"><i class="fa-solid fa-users"></i> Customers</a>
@@ -435,28 +565,32 @@
         <div id="dashboardView" class="view-section">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: #E3F2FD; color: #1976D2;"><i class="fa-solid fa-bag-shopping"></i></div>
+                    <div class="stat-icon" style="background: #E3F2FD; color: #1976D2;"><i
+                            class="fa-solid fa-bag-shopping"></i></div>
                     <div>
                         <h3 id="statOrders">-</h3>
                         <p style="color: #888; font-size: 0.9rem;">New Orders</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: #E8F5E9; color: #2E7D32;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    <div class="stat-icon" style="background: #E8F5E9; color: #2E7D32;"><i
+                            class="fa-solid fa-indian-rupee-sign"></i></div>
                     <div>
                         <h3 id="statSales">-</h3>
                         <p style="color: #888; font-size: 0.9rem;">Total Sales</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: #FFF3E0; color: #EF6C00;"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="stat-icon" style="background: #FFF3E0; color: #EF6C00;"><i
+                            class="fa-solid fa-box-open"></i></div>
                     <div>
                         <h3 id="statProducts">-</h3>
                         <p style="color: #888; font-size: 0.9rem;">Total Products</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: #F3E5F5; color: #7B1FA2;"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-icon" style="background: #F3E5F5; color: #7B1FA2;"><i
+                            class="fa-solid fa-users"></i></div>
                     <div>
                         <h3 id="statCustomers">-</h3>
                         <p style="color: #888; font-size: 0.9rem;">Total Customers</p>
@@ -468,7 +602,8 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2>Latest Product Summary</h2>
                 </div>
-                <p style="margin-bottom: 20px; color: #555;">Use the Products tab to upload a new cake with image storage directly in Firebase.</p>
+                <p style="margin-bottom: 20px; color: #555;">Use the Products tab to upload a new cake with image
+                    storage directly in Firebase.</p>
                 <table>
                     <thead>
                         <tr>
@@ -492,14 +627,7 @@
 
         <div id="ordersView" class="view-section hide">
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:25px; flex-wrap:wrap;">
-                    <h2 style="margin:0;">Custom Inquiries & Orders</h2>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <label for="reportMonth" style="font-size:0.9rem; color:#666;">Month</label>
-                        <input id="reportMonth" type="month" style="padding:8px 10px; border-radius:8px; border:1px solid #ddd;">
-                        <button id="generateReportBtn" class="btn-add" style="padding:8px 12px; height:40px;">Generate Monthly Report</button>
-                    </div>
-                </div>
+                <h2 style="margin-bottom: 25px;">Custom Inquiries & Orders</h2>
                 <table>
                     <thead>
                         <tr>
@@ -568,7 +696,8 @@
                             <div class="file-upload-wrapper" onclick="document.getElementById('productImage').click()">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <p id="uploadText">Click to upload image</p>
-                                <input id="productImage" type="file" accept="image/*" required onchange="document.getElementById('uploadText').textContent = this.files[0].name">
+                                <input id="productImage" type="file" accept="image/*" required
+                                    onchange="document.getElementById('uploadText').textContent = this.files[0].name">
                             </div>
                         </div>
                     </div>
@@ -576,14 +705,13 @@
                         <label for="productDescription">Description</label>
                         <textarea id="productDescription" rows="4" placeholder="Short product description"></textarea>
                     </div>
-                    <div id="productUploadError" style="color:#b71c1c; margin-bottom:10px; display:none; font-weight:600;"></div>
                     <button type="submit" class="btn-add">Upload Product</button>
                 </form>
             </div>
 
             <div class="card">
                 <h2 style="margin-bottom: 25px;">Product List</h2>
-                <table>                    
+                <table>
                     <thead>
                         <tr>
                             <th>Product</th>
@@ -609,11 +737,13 @@
                 <form id="settingsForm" style="display: flex; flex-direction: column; gap: 15px;">
                     <div class="form-group">
                         <label>Store Name</label>
-                        <input type="text" id="storeName" value="Cake Heaven by Priyanka" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+                        <input type="text" id="storeName" value="Cake Heaven by Priyanka"
+                            style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
                     </div>
                     <div class="form-group">
                         <label>WhatsApp Number (with Country Code)</label>
-                        <input type="text" id="storePhone" value="918796343915" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+                        <input type="text" id="storePhone" value="918796343915"
+                            style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
                     </div>
                     <button type="submit" class="btn-add" style="width: 200px;">Save Settings</button>
                 </form>
@@ -626,12 +756,12 @@
         <div style="text-align:center;">
             <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
             <p style="margin-top: 15px; font-weight: 700; color: var(--dark);">Please wait...</p>
-            <button onclick="document.getElementById('loadingOverlay').classList.remove('active')" style="margin-top: 20px; background: #eee; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;">Force Close</button>
         </div>
     </div>
 
     <div id="imageModal" class="modal">
-        <span class="close-modal" onclick="document.getElementById('imageModal').classList.remove('active')">&times;</span>
+        <span class="close-modal"
+            onclick="document.getElementById('imageModal').classList.remove('active')">&times;</span>
         <img id="modalImg" class="modal-content">
         <p id="modalCaption" style="color:white; margin-top:20px; font-weight:600;"></p>
     </div>
@@ -669,7 +799,6 @@
                 this.attachOrderActionListeners();
                 this.attachProductActionListeners();
                 this.attachSettingsListener();
-                this.attachReportListeners();
                 this.attachPaginationListeners();
                 this.attachMobileListeners();
                 this.setView('dashboard');
@@ -679,7 +808,7 @@
             attachMobileListeners() {
                 const toggle = document.getElementById('sidebarToggle');
                 const sidebar = document.getElementById('sidebar');
-                
+
                 toggle.addEventListener('click', () => {
                     sidebar.classList.toggle('active');
                 });
@@ -709,20 +838,6 @@
                         this.renderProducts();
                     }
                 });
-            },
-
-            attachReportListeners() {
-                const btn = document.getElementById('generateReportBtn');
-                if (btn) {
-                    btn.addEventListener('click', () => this.generateMonthlyReport());
-                }
-                // Set default month to current month
-                const monthInput = document.getElementById('reportMonth');
-                if (monthInput && !monthInput.value) {
-                    const now = new Date();
-                    const m = now.toISOString().slice(0,7);
-                    monthInput.value = m;
-                }
             },
 
             openImageModal(src, caption) {
@@ -780,73 +895,6 @@
                 });
             },
 
-            async generateMonthlyReport() {
-                const monthInput = document.getElementById('reportMonth');
-                if (!monthInput || !monthInput.value) {
-                    this.showToast('Select a month first', 'fa-exclamation-circle');
-                    return;
-                }
-                const [yearStr, monthStr] = monthInput.value.split('-');
-                const year = Number(yearStr);
-                const month = Number(monthStr) - 1; // 0-indexed
-
-                this.setLoading(true);
-                try {
-                    const customSnap = await getDocs(collection(db, 'custom_orders'));
-                    const standardSnap = await getDocs(collection(db, 'orders'));
-
-                    const all = [
-                        ...customSnap.docs.map(d => ({ id: d.id, type: 'custom', ...d.data() })),
-                        ...standardSnap.docs.map(d => ({ id: d.id, type: 'standard', ...d.data() })),
-                    ];
-
-                    const filtered = all.filter(o => {
-                        const ts = o.createdAt;
-                        let d = null;
-                        if (!ts) return false;
-                        if (ts.seconds) d = new Date(ts.seconds * 1000);
-                        else d = new Date(ts);
-                        return d.getFullYear() === year && d.getMonth() === month;
-                    });
-
-                    if (!filtered.length) {
-                        this.showToast('No orders for selected month', 'fa-info-circle');
-                        return;
-                    }
-
-                    // Build CSV
-                    const cols = ['id','type','customer_name','customer_phone','customer_address','items','total','status','payment_option','createdAt','delivery_date','delivery_time'];
-                    const rows = filtered.map(o => {
-                        const ts = o.createdAt;
-                        let dStr = '';
-                        if (ts) {
-                            if (ts.seconds) dStr = new Date(ts.seconds * 1000).toISOString();
-                            else dStr = new Date(ts).toISOString();
-                        }
-                        const items = o.items ? (Array.isArray(o.items) ? o.items.map(i => `${i.name} x${i.qty || 1}`).join('; ') : JSON.stringify(o.items)) : '';
-                        return [o.id, o.type, o.customer_name || '', o.customer_phone || '', (o.customer_address || '').replace(/\n/g,' '), `"${items.replace(/"/g,'""') }"`, o.total || '', o.status || '', o.payment_option || '', dStr, o.delivery_date || o.preferred_date || '', o.delivery_time || o.preferred_time || ''];
-                    });
-
-                    const csv = [cols.join(',')].concat(rows.map(r => r.join(','))).join('\n');
-                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `orders_${monthInput.value}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    URL.revokeObjectURL(url);
-                    this.showToast('Monthly report downloaded', 'fa-download');
-
-                } catch (error) {
-                    console.error('Failed to generate report', error);
-                    this.showToast('Failed to generate report', 'fa-exclamation-circle');
-                } finally {
-                    this.setLoading(false);
-                }
-            },
-
             attachFormListener() {
                 const form = document.getElementById('productForm');
                 form.addEventListener('submit', this.handleProductSubmit.bind(this));
@@ -859,11 +907,11 @@
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        
+
                         // Max dimensions for Base64 storage
                         let width = img.width;
                         let height = img.height;
-                        const maxSide = 1000; 
+                        const maxSide = 1000;
 
                         if (width > maxSide || height > maxSide) {
                             if (width > height) {
@@ -878,7 +926,7 @@
                         canvas.width = width;
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
-                        
+
                         // Compress to JPEG with 0.7 quality to stay under 1MB Firestore limit
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
                         resolve(dataUrl);
@@ -943,7 +991,7 @@
                     const snap1 = await getDocs(collection(db, 'custom_orders'));
                     const snap2 = await getDocs(collection(db, 'orders'));
                     const orders = [...snap1.docs.map(d => d.data()), ...snap2.docs.map(d => d.data())];
-                    
+
                     // Group by phone to find unique customers
                     const customerMap = {};
                     orders.forEach(order => {
@@ -986,13 +1034,13 @@
                 try {
                     const customSnap = await getDocs(collection(db, 'custom_orders'));
                     const standardSnap = await getDocs(collection(db, 'orders'));
-                    
+
                     const customOrders = customSnap.docs.map(doc => ({ id: doc.id, type: 'custom', ...doc.data() }));
                     const standardOrders = standardSnap.docs.map(doc => ({ id: doc.id, type: 'standard', ...doc.data() }));
-                    
+
                     this.orders = [...customOrders, ...standardOrders];
                     this.orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-                    
+
                     this.orderPage = 1;
                     this.renderOrders(this.orders);
                 } catch (error) {
@@ -1006,7 +1054,7 @@
             renderOrders(orders) {
                 const body = document.getElementById('ordersTableBody');
                 const pagEl = document.getElementById('ordersPagination');
-                
+
                 if (!orders.length) {
                     body.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#666;">No orders yet.</td></tr>`;
                     pagEl.innerHTML = '';
@@ -1018,18 +1066,17 @@
 
                 body.innerHTML = paginated.map(order => {
                     const isCustom = order.type === 'custom';
-                    const details = isCustom 
+                    const details = isCustom
                         ? `Flavor: ${order.flavor}<br>Size: ${order.size} Kg<br>Msg: ${order.message || 'None'}`
                         : (order.items || []).map(i => `${i.name} (x${i.qty})`).join(', ');
 
                     const status = order.status || 'pending';
                     let buttons = '';
-                    
+
                     if (status === 'pending') {
                         buttons = `
-                            <button data-id="${order.id}" data-type="${order.type}" data-action="confirmed" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #1976D2; color:white; margin-bottom:5px; width:100%">Confirm</button>
-                            <button data-id="${order.id}" data-type="${order.type}" data-action="accepted" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32; color:white; margin-bottom:5px; width:100%">Accept</button>
-                            <button data-id="${order.id}" data-type="${order.type}" data-action="declined" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #d32f2f; color:white; width:100%">Decline</button>
+                            <button data-id="${order.id}" data-type="${order.type}" data-action="accepted" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32; margin-bottom:5px; width:100%;">Accept</button>
+                            <button data-id="${order.id}" data-type="${order.type}" data-action="declined" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #d32f2f; width:100%;">Decline</button>
                         `;
                     } else if (status === 'accepted') {
                         buttons = `
@@ -1038,8 +1085,8 @@
                     }
 
                     const imgSrc = order.image_landscape || order.image_portrait || "";
-                    const imgHtml = imgSrc 
-                        ? `<img src="${imgSrc}" class="product-img-admin" style="cursor:zoom-in;" onclick="AdminApp.openImageModal('${imgSrc}', 'Order for ${order.customer_name}')">` 
+                    const imgHtml = imgSrc
+                        ? `<img src="${imgSrc}" class="product-img-admin" style="cursor:zoom-in;" onclick="AdminApp.openImageModal('${imgSrc}', 'Order for ${order.customer_name}')">`
                         : '<small>No Image</small>';
 
                     return `
@@ -1118,12 +1165,7 @@
 
                 body.innerHTML = paginated.map(product => `
                     <tr>
-                        <td>
-                            <div>
-                                <strong>${product.name || 'Untitled'}</strong><br>
-                                <small style="color:#666">${product.description || ''}</small>
-                            </div>
-                        </td>
+                        <td>${product.name || 'Untitled'}</td>
                         <td>${product.category || 'regular'}</td>
                         <td>₹${Number(product.price || 0).toFixed(0)}</td>
                         <td><img src="${product.image_landscape || product.imageUrl || ''}" class="product-img-admin" style="cursor:zoom-in;" onclick="AdminApp.openImageModal('${product.image_landscape || product.imageUrl}', '${product.name}')"></td>
@@ -1148,62 +1190,30 @@
                 }
 
                 this.setLoading(true);
-                console.log("Upload process started...");
-
                 try {
-                    const imageRef = ref(storage, `product_images/${Date.now()}_${file.name}`);
-                    let imageUrl = 'https://placehold.co/600x400?text=CORS+Error+Placeholder';
+                    const base64Image = await this.toBase64(file);
 
-                    // Step 1: Image Upload (with fallback)
-                    let imageBase64 = '';
-                    try {
-                        const uploadResult = await uploadBytes(imageRef, file);
-                        imageUrl = await getDownloadURL(uploadResult.ref);
-                    } catch (storageError) {
-                        console.warn('Storage upload failed (CORS or network). Will save Base64 to Firestore as fallback.', storageError);
-                        this.showToast('Image upload blocked by CORS — saving inline image', 'fa-triangle-exclamation');
-                        try {
-                            imageBase64 = await this.toBase64(file);
-                        } catch (b64err) {
-                            console.error('Base64 conversion failed', b64err);
-                        }
-                    }
-
-                    // Step 2: Firestore Database Save
-                    const docData = {
+                    await addDoc(productsCollection, {
                         name,
                         category,
                         price,
                         description,
+                        host_uid: "YinadrOrLZWzaFpJPOhYoKtrakH3",
+                        image: "",
+                        imageUrl: "",
+                        image_landscape: base64Image,
+                        image_portrait: base64Image,
                         createdAt: serverTimestamp()
-                    };
-                    if (imageUrl && imageUrl.startsWith('http')) {
-                        docData.imageUrl = imageUrl;
-                    } else if (imageBase64) {
-                        docData.image_landscape = imageBase64;
-                        docData.image_portrait = imageBase64;
-                    }
-
-                    await addDoc(productsCollection, docData);
+                    });
 
                     document.getElementById('productForm').reset();
-                    this.showToast('Product successfully added!', 'fa-check-circle');
+                    this.showToast('Product uploaded successfully.', 'fa-check-circle');
                     document.getElementById('latestStatus').textContent = 'Product added successfully';
-                    // clear any previous error
-                    const errEl = document.getElementById('productUploadError');
-                    if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
-                    await this.loadProducts();
-
+                    this.loadProducts();
                 } catch (error) {
                     console.error('Failed to save product', error);
-                    this.showToast(error.message || 'Failed to save product', 'fa-exclamation-circle');
-                    const errEl = document.getElementById('productUploadError');
-                    if (errEl) {
-                        errEl.style.display = 'block';
-                        errEl.textContent = (error && error.message) ? error.message : String(error);
-                    }
+                    this.showToast(`Error: ${error.code || error.message}. Check console or rules.`, 'fa-exclamation-circle');
                 } finally {
-                    console.log("Submission process finished.");
                     this.setLoading(false);
                 }
             },
@@ -1213,7 +1223,7 @@
                     const customSnap = await getDocs(collection(db, 'custom_orders'));
                     const standardSnap = await getDocs(collection(db, 'orders'));
                     const productSnap = await getDocs(collection(db, 'products'));
-                    
+
                     const orders = [...customSnap.docs.map(d => d.data()), ...standardSnap.docs.map(d => d.data())];
                     const productCount = productSnap.size;
 
@@ -1221,7 +1231,7 @@
                     const deliveredOrders = orders.filter(o => o.status === 'delivered');
                     const totalSales = deliveredOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
                     const pendingOrders = orders.filter(o => o.status === 'pending').length;
-                    
+
                     // Unique customers by phone
                     const customers = new Set(orders.map(o => o.customer_phone).filter(p => p));
 
@@ -1237,12 +1247,7 @@
             },
 
             setLoading(active) {
-                const overlay = document.getElementById('loadingOverlay');
-                overlay.classList.toggle('active', active);
-                if (active) {
-                    // Safety timeout: auto-close after 12 seconds
-                    setTimeout(() => overlay.classList.remove('active'), 12000);
-                }
+                document.getElementById('loadingOverlay').classList.toggle('active', active);
             },
 
             showToast(message, icon = 'fa-check-circle') {
@@ -1260,4 +1265,5 @@
         AdminApp.init();
     </script>
 </body>
+
 </html>
