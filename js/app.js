@@ -273,6 +273,7 @@ const App = {
                                     </div>
                                     <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
                                         <h4 style="font-size: 1.2rem;">${item.name}</h4>
+                                        <p style="opacity: 0.85; margin: 0; min-height: 44px;">${item.description || ''}</p>
                                         <button onclick="App.addToCart('${item.id}', '${item.name}', ${item.price})" class="btn-add" style="background: var(--primary-pink); color: var(--deep-brown); padding: 12px; border-radius: 12px; font-weight: 600; width: 100%; border: 1px dashed var(--accent-pink);">Add to Cart</button>
                                     </div>
                                 </div>
@@ -592,6 +593,7 @@ const App = {
                     name: data.name || 'Untitled Cake',
                     price: Number(data.price) || 0,
                     image: data.image_landscape || data.imageUrl || 'https://placehold.co/600x400?text=No+Image',
+                    description: data.description || '',
                     category
                 };
 

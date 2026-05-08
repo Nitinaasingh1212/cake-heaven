@@ -608,6 +608,7 @@
         <div style="text-align:center;">
             <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
             <p style="margin-top: 15px; font-weight: 700; color: var(--dark);">Please wait...</p>
+            <button onclick="document.getElementById('loadingOverlay').classList.remove('active')" style="margin-top: 20px; background: #eee; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;">Force Close</button>
         </div>
     </div>
 
@@ -1016,7 +1017,12 @@
 
                 body.innerHTML = paginated.map(product => `
                     <tr>
-                        <td>${product.name || 'Untitled'}</td>
+                        <td>
+                            <div>
+                                <strong>${product.name || 'Untitled'}</strong><br>
+                                <small style="color:#666">${product.description || ''}</small>
+                            </div>
+                        </td>
                         <td>${product.category || 'regular'}</td>
                         <td>₹${Number(product.price || 0).toFixed(0)}</td>
                         <td><img src="${product.image_landscape || product.imageUrl || ''}" class="product-img-admin" style="cursor:zoom-in;" onclick="AdminApp.openImageModal('${product.image_landscape || product.imageUrl}', '${product.name}')"></td>
@@ -1041,30 +1047,40 @@
                 }
 
                 this.setLoading(true);
-                try {
-                    const base64Image = await this.toBase64(file);
+                console.log("Upload process started...");
 
+                try {
+                    const imageRef = ref(storage, `product_images/${Date.now()}_${file.name}`);
+                    let imageUrl = 'https://placehold.co/600x400?text=CORS+Error+Placeholder';
+
+                    // Step 1: Image Upload (with fallback)
+                    try {
+                        const uploadResult = await uploadBytes(imageRef, file);
+                        imageUrl = await getDownloadURL(uploadResult.ref);
+                    } catch (storageError) {
+                        this.showToast('Image upload skipped (CORS)', 'fa-triangle-exclamation');
+                    }
+
+                    // Step 2: Firestore Database Save
                     await addDoc(productsCollection, {
                         name,
                         category,
                         price,
                         description,
-                        host_uid: "YinadrOrLZWzaFpJPOhYoKtrakH3",
-                        image: "",
-                        imageUrl: "",
-                        image_landscape: base64Image,
-                        image_portrait: base64Image,
+                        imageUrl,
                         createdAt: serverTimestamp()
                     });
 
                     document.getElementById('productForm').reset();
-                    this.showToast('Product uploaded successfully.', 'fa-check-circle');
+                    this.showToast('Product successfully added!', 'fa-check-circle');
                     document.getElementById('latestStatus').textContent = 'Product added successfully';
-                    this.loadProducts();
+                    await this.loadProducts();
+
                 } catch (error) {
                     console.error('Failed to save product', error);
-                    this.showToast(`Error: ${error.code || error.message}. Check console or rules.`, 'fa-exclamation-circle');
+                    this.showToast(error.message || 'Failed to save product', 'fa-exclamation-circle');
                 } finally {
+                    console.log("Submission process finished.");
                     this.setLoading(false);
                 }
             },
@@ -1098,7 +1114,12 @@
             },
 
             setLoading(active) {
-                document.getElementById('loadingOverlay').classList.toggle('active', active);
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.classList.toggle('active', active);
+                if (active) {
+                    // Safety timeout: auto-close after 12 seconds
+                    setTimeout(() => overlay.classList.remove('active'), 12000);
+                }
             },
 
             showToast(message, icon = 'fa-check-circle') {
