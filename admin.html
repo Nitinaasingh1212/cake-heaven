@@ -273,7 +273,15 @@
             }
             .main-content {
                 margin-left: 0;
+                width: 100%; /* ensure content uses full width on small screens */
                 padding: 80px 20px 20px;
+            }
+            /* Make sidebar overlay content when active */
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
             }
             .mobile-header {
                 display: flex;
