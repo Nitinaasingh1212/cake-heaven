@@ -1155,22 +1155,36 @@
                     let imageUrl = 'https://placehold.co/600x400?text=CORS+Error+Placeholder';
 
                     // Step 1: Image Upload (with fallback)
+                    let imageBase64 = '';
                     try {
                         const uploadResult = await uploadBytes(imageRef, file);
                         imageUrl = await getDownloadURL(uploadResult.ref);
                     } catch (storageError) {
-                        this.showToast('Image upload skipped (CORS)', 'fa-triangle-exclamation');
+                        console.warn('Storage upload failed (CORS or network). Will save Base64 to Firestore as fallback.', storageError);
+                        this.showToast('Image upload blocked by CORS — saving inline image', 'fa-triangle-exclamation');
+                        try {
+                            imageBase64 = await this.toBase64(file);
+                        } catch (b64err) {
+                            console.error('Base64 conversion failed', b64err);
+                        }
                     }
 
                     // Step 2: Firestore Database Save
-                    await addDoc(productsCollection, {
+                    const docData = {
                         name,
                         category,
                         price,
                         description,
-                        imageUrl,
                         createdAt: serverTimestamp()
-                    });
+                    };
+                    if (imageUrl && imageUrl.startsWith('http')) {
+                        docData.imageUrl = imageUrl;
+                    } else if (imageBase64) {
+                        docData.image_landscape = imageBase64;
+                        docData.image_portrait = imageBase64;
+                    }
+
+                    await addDoc(productsCollection, docData);
 
                     document.getElementById('productForm').reset();
                     this.showToast('Product successfully added!', 'fa-check-circle');
