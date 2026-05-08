@@ -492,7 +492,14 @@
 
         <div id="ordersView" class="view-section hide">
             <div class="card">
-                <h2 style="margin-bottom: 25px;">Custom Inquiries & Orders</h2>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:25px; flex-wrap:wrap;">
+                    <h2 style="margin:0;">Custom Inquiries & Orders</h2>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <label for="reportMonth" style="font-size:0.9rem; color:#666;">Month</label>
+                        <input id="reportMonth" type="month" style="padding:8px 10px; border-radius:8px; border:1px solid #ddd;">
+                        <button id="generateReportBtn" class="btn-add" style="padding:8px 12px; height:40px;">Generate Monthly Report</button>
+                    </div>
+                </div>
                 <table>
                     <thead>
                         <tr>
@@ -702,6 +709,20 @@
                 });
             },
 
+            attachReportListeners() {
+                const btn = document.getElementById('generateReportBtn');
+                if (btn) {
+                    btn.addEventListener('click', () => this.generateMonthlyReport());
+                }
+                // Set default month to current month
+                const monthInput = document.getElementById('reportMonth');
+                if (monthInput && !monthInput.value) {
+                    const now = new Date();
+                    const m = now.toISOString().slice(0,7);
+                    monthInput.value = m;
+                }
+            },
+
             openImageModal(src, caption) {
                 const modal = document.getElementById('imageModal');
                 const img = document.getElementById('modalImg');
@@ -755,6 +776,73 @@
                         this.setView(item.dataset.view);
                     });
                 });
+            },
+
+            async generateMonthlyReport() {
+                const monthInput = document.getElementById('reportMonth');
+                if (!monthInput || !monthInput.value) {
+                    this.showToast('Select a month first', 'fa-exclamation-circle');
+                    return;
+                }
+                const [yearStr, monthStr] = monthInput.value.split('-');
+                const year = Number(yearStr);
+                const month = Number(monthStr) - 1; // 0-indexed
+
+                this.setLoading(true);
+                try {
+                    const customSnap = await getDocs(collection(db, 'custom_orders'));
+                    const standardSnap = await getDocs(collection(db, 'orders'));
+
+                    const all = [
+                        ...customSnap.docs.map(d => ({ id: d.id, type: 'custom', ...d.data() })),
+                        ...standardSnap.docs.map(d => ({ id: d.id, type: 'standard', ...d.data() })),
+                    ];
+
+                    const filtered = all.filter(o => {
+                        const ts = o.createdAt;
+                        let d = null;
+                        if (!ts) return false;
+                        if (ts.seconds) d = new Date(ts.seconds * 1000);
+                        else d = new Date(ts);
+                        return d.getFullYear() === year && d.getMonth() === month;
+                    });
+
+                    if (!filtered.length) {
+                        this.showToast('No orders for selected month', 'fa-info-circle');
+                        return;
+                    }
+
+                    // Build CSV
+                    const cols = ['id','type','customer_name','customer_phone','customer_address','items','total','status','payment_option','createdAt','delivery_date','delivery_time'];
+                    const rows = filtered.map(o => {
+                        const ts = o.createdAt;
+                        let dStr = '';
+                        if (ts) {
+                            if (ts.seconds) dStr = new Date(ts.seconds * 1000).toISOString();
+                            else dStr = new Date(ts).toISOString();
+                        }
+                        const items = o.items ? (Array.isArray(o.items) ? o.items.map(i => `${i.name} x${i.qty || 1}`).join('; ') : JSON.stringify(o.items)) : '';
+                        return [o.id, o.type, o.customer_name || '', o.customer_phone || '', (o.customer_address || '').replace(/\n/g,' '), `"${items.replace(/"/g,'""') }"`, o.total || '', o.status || '', o.payment_option || '', dStr, o.delivery_date || o.preferred_date || '', o.delivery_time || o.preferred_time || ''];
+                    });
+
+                    const csv = [cols.join(',')].concat(rows.map(r => r.join(','))).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `orders_${monthInput.value}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                    this.showToast('Monthly report downloaded', 'fa-download');
+
+                } catch (error) {
+                    console.error('Failed to generate report', error);
+                    this.showToast('Failed to generate report', 'fa-exclamation-circle');
+                } finally {
+                    this.setLoading(false);
+                }
             },
 
             attachFormListener() {
