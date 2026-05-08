@@ -668,6 +668,7 @@
                 this.attachOrderActionListeners();
                 this.attachProductActionListeners();
                 this.attachSettingsListener();
+                this.attachReportListeners();
                 this.attachPaginationListeners();
                 this.attachMobileListeners();
                 this.setView('dashboard');
@@ -1025,8 +1026,9 @@
                     
                     if (status === 'pending') {
                         buttons = `
-                            <button data-id="${order.id}" data-type="${order.type}" data-action="accepted" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32; margin-bottom:5px; width:100%;">Accept</button>
-                            <button data-id="${order.id}" data-type="${order.type}" data-action="declined" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #d32f2f; width:100%;">Decline</button>
+                            <button data-id="${order.id}" data-type="${order.type}" data-action="confirmed" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #1976D2; color:white; margin-bottom:5px; width:100%">Confirm</button>
+                            <button data-id="${order.id}" data-type="${order.type}" data-action="accepted" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #2E7D32; color:white; margin-bottom:5px; width:100%">Accept</button>
+                            <button data-id="${order.id}" data-type="${order.type}" data-action="declined" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #d32f2f; color:white; width:100%">Decline</button>
                         `;
                     } else if (status === 'accepted') {
                         buttons = `
