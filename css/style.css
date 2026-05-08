@@ -369,6 +369,19 @@ footer {
     animation: slideOutRight 0.5s forwards;
 }
 
+/* Ensure cake images are not cropped on smaller screens */
+.cake-card img,
+.featured-section img,
+.about-grid img,
+.blogs img {
+    width: 100%;
+    height: auto;
+    max-height: 360px;
+    object-fit: contain;
+    display: block;
+    background: #fff;
+}
+
 .toast i {
     font-size: 1.2rem;
     color: var(--gold);

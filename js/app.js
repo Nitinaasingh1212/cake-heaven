@@ -152,7 +152,7 @@ const App = {
                         <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.5rem;">Our Favorites</h2>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
                             <div class="cake-card" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft);">
-                                <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80" alt="Delicious Chocolate Truffle Cake - Cake Heaven Lucknow" style="width: 100%; height: 250px; object-fit: cover;">
+                                <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80" alt="Delicious Chocolate Truffle Cake - Cake Heaven Lucknow" style="width: 100%; height: auto; max-height: 320px; object-fit: contain;">
                                 <div style="padding: 20px;">
                                     <h3>Chocolate Truffle</h3>
                                     <p>Rich, creamy, and heavenly.</p>
@@ -160,7 +160,7 @@ const App = {
                                 </div>
                             </div>
                             <div class="cake-card" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft);">
-                                <img src="https://images.unsplash.com/photo-1627834377411-8da5f4f09de8?auto=format&fit=crop&w=400&q=80" alt="Premium Red Velvet Cake Lucknow - Best Quality" style="width: 100%; height: 250px; object-fit: cover;">
+                                <img src="https://images.unsplash.com/photo-1627834377411-8da5f4f09de8?auto=format&fit=crop&w=400&q=80" alt="Premium Red Velvet Cake Lucknow - Best Quality" style="width: 100%; height: auto; max-height: 320px; object-fit: contain;">
                                 <div style="padding: 20px;">
                                     <h3>Premium Red Velvet</h3>
                                     <p>A classic taste of elegance.</p>
@@ -168,7 +168,7 @@ const App = {
                                 </div>
                             </div>
                             <div class="cake-card" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft);">
-                                <img src="https://images.unsplash.com/photo-1535254973040-607b474cb50d?auto=format&fit=crop&w=400&q=80" alt="Custom Designer Floral Cake - Cake Heaven by Priyanka" style="width: 100%; height: 250px; object-fit: cover;">
+                                <img src="https://images.unsplash.com/photo-1535254973040-607b474cb50d?auto=format&fit=crop&w=400&q=80" alt="Custom Designer Floral Cake - Cake Heaven by Priyanka" style="width: 100%; height: auto; max-height: 320px; object-fit: contain;">
                                 <div style="padding: 20px;">
                                     <h3>Designer Floral</h3>
                                     <p>Beautifully crafted for your special day.</p>
@@ -268,7 +268,7 @@ const App = {
                             ${App.menu[category].map(item => `
                                 <div class="cake-card" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft); transition: var(--transition-smooth);">
                                     <div style="position: relative;">
-                                        <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 220px; object-fit: cover;">
+                                        <img src="${item.image}" alt="${item.name}" style="width: 100%; height: auto; max-height: 320px; object-fit: contain;">
                                         <span style="position: absolute; top: 15px; right: 15px; background: var(--gold); color: white; padding: 5px 12px; border-radius: 15px; font-weight: 700;">₹${item.price}</span>
                                     </div>
                                     <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
