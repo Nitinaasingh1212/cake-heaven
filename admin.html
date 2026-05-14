@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Cake Heaven by Priyanka</title>
+    <meta name="robots" content="noindex, nofollow">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -178,6 +179,11 @@
             color: #C62828;
         }
 
+        .status.marked {
+            background: #F3E5F5;
+            color: #7B1FA2;
+        }
+
         .btn-delete {
             background: #FFEBEE;
             color: #C62828;
@@ -307,6 +313,24 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
         .menu-btn {
             background: none;
             border: none;
@@ -319,7 +343,8 @@
             .sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
-                z-index: 1001;
+                z-index: 1002;
+                box-shadow: 2px 0 15px rgba(0,0,0,0.1);
             }
 
             .sidebar.active {
@@ -328,6 +353,7 @@
 
             .main-content {
                 margin-left: 0;
+                width: 100%;
                 padding: 80px 20px 20px;
             }
 
@@ -359,7 +385,18 @@
             }
 
             header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
                 margin-bottom: 20px;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .card h2 {
+                font-size: 1.25rem;
             }
 
             .card {
@@ -492,7 +529,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 999;
+            z-index: 4000;
             backdrop-filter: blur(4px);
         }
 
@@ -512,7 +549,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            z-index: 1000;
+            z-index: 4100;
             animation: slideIn 0.35s ease;
         }
 
@@ -527,10 +564,63 @@
                 opacity: 1;
             }
         }
+
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: var(--bg);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-family: 'Playfair Display', serif;
+        }
     </style>
 </head>
 
 <body>
+
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <i class="fa-solid fa-cake-candles" style="font-size: 3rem; color: var(--gold); margin-bottom: 20px;"></i>
+            <h2>Admin Login</h2>
+            <form id="loginForm" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="email" id="adminEmail" placeholder="Admin Email" required>
+                <input type="password" id="adminPassword" placeholder="Password" required>
+                <button type="submit" class="btn-add" style="margin-top: 10px; font-size: 1.1rem; padding: 12px;">Login Securely</button>
+            </form>
+            <div style="margin: 20px 0; display: flex; align-items: center; text-align: center; color: #aaa;">
+                <div style="flex: 1; border-top: 1px solid #eee;"></div>
+                <span style="padding: 0 10px;">OR</span>
+                <div style="flex: 1; border-top: 1px solid #eee;"></div>
+            </div>
+            <button id="googleLoginBtn" style="width: 100%; background: white; border: 1px solid #ddd; padding: 12px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-size: 1.05rem; font-weight: 600; transition: background 0.3s;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='white'">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 20px;" alt="Google Logo">
+                Sign in with Google
+            </button>
+            <p style="margin-top: 20px; font-size: 0.85rem; color: #888;">Only authorized admins can access this dashboard.</p>
+        </div>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <div class="mobile-header">
         <div class="logo" style="margin-bottom: 0; font-size: 1.2rem;">
@@ -551,6 +641,7 @@
             <a href="#" class="nav-item" data-view="orders"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
             <a href="#" class="nav-item" data-view="customers"><i class="fa-solid fa-users"></i> Customers</a>
             <a href="#" class="nav-item" data-view="settings"><i class="fa-solid fa-gear"></i> Settings</a>
+            <a href="#" class="nav-item" id="logoutBtn" style="color: #d32f2f; margin-top: 20px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
         </ul>
     </div>
 
@@ -599,8 +690,9 @@
             </div>
 
             <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <h2>Latest Product Summary</h2>
+                    <button id="downloadReportBtn" class="btn-add" style="background: #1976D2;"><i class="fa-solid fa-download"></i> Monthly Report</button>
                 </div>
                 <p style="margin-bottom: 20px; color: #555;">Use the Products tab to upload a new cake with image
                     storage directly in Firebase.</p>
@@ -770,6 +862,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyApHYstsNpEBODGGqoqZG49Icx2WCWthas",
@@ -784,6 +877,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
+        const auth = getAuth(app);
         const productsCollection = collection(db, 'products');
 
         const AdminApp = {
@@ -794,6 +888,7 @@
             itemsPerPage: 5,
 
             init() {
+                this.attachAuthListeners();
                 this.attachNavListeners();
                 this.attachFormListener();
                 this.attachOrderActionListeners();
@@ -801,23 +896,140 @@
                 this.attachSettingsListener();
                 this.attachPaginationListeners();
                 this.attachMobileListeners();
-                this.setView('dashboard');
-                this.loadProducts();
+                this.attachDownloadListener();
+            },
+
+            attachAuthListeners() {
+                const loginForm = document.getElementById('loginForm');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const loginOverlay = document.getElementById('loginOverlay');
+                const googleLoginBtn = document.getElementById('googleLoginBtn');
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        loginOverlay.style.display = 'none';
+                        this.showToast('Logged in successfully!', 'fa-check');
+                        this.setView('dashboard');
+                        this.loadProducts();
+                    } else {
+                        loginOverlay.style.display = 'flex';
+                    }
+                });
+
+                if (loginForm) {
+                    loginForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const email = document.getElementById('adminEmail').value;
+                        const password = document.getElementById('adminPassword').value;
+                        
+                        this.setLoading(true);
+                        try {
+                            await signInWithEmailAndPassword(auth, email, password);
+                            loginForm.reset();
+                        } catch (error) {
+                            console.error('Login failed:', error);
+                            this.showToast('Invalid credentials. Please try again.', 'fa-exclamation-circle');
+                        } finally {
+                            this.setLoading(false);
+                        }
+                    });
+                }
+
+                if (googleLoginBtn) {
+                    googleLoginBtn.addEventListener('click', async () => {
+                        const provider = new GoogleAuthProvider();
+                        this.setLoading(true);
+                        try {
+                            await signInWithPopup(auth, provider);
+                        } catch (error) {
+                            console.error('Google Login failed:', error);
+                            this.showToast(`Error: ${error.message}`, 'fa-exclamation-circle');
+                        } finally {
+                            this.setLoading(false);
+                        }
+                    });
+                }
+
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        signOut(auth).then(() => {
+                            this.showToast('Logged out securely.', 'fa-info-circle');
+                            // Clear data
+                            this.products = [];
+                            this.orders = [];
+                        }).catch(err => console.error('Logout error', err));
+                    });
+                }
+            },
+
+            attachDownloadListener() {
+                const btn = document.getElementById('downloadReportBtn');
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        this.downloadMonthlyReport();
+                    });
+                }
+            },
+
+            downloadMonthlyReport() {
+                if (!this.orders || this.orders.length === 0) {
+                    this.showToast('No orders available to download', 'fa-exclamation-circle');
+                    return;
+                }
+                
+                let csv = 'Date,Customer Name,Phone,Type,Status,Total,Details\n';
+                this.orders.forEach(o => {
+                    const date = o.createdAt?.seconds ? new Date(o.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown';
+                    const customer = `"${(o.customer_name || '').replace(/"/g, '""')}"`;
+                    const phone = o.customer_phone || '';
+                    const type = o.type || 'standard';
+                    const status = o.status || 'pending';
+                    const total = o.total || '';
+                    
+                    const isCustom = o.type === 'custom';
+                    const detailsStr = isCustom
+                        ? `Flavor: ${o.flavor || ''} | Size: ${o.size || ''}Kg`
+                        : (o.items || []).map(i => `${i.name} (x${i.qty})`).join(' | ');
+                    const details = `"${detailsStr.replace(/"/g, '""')}"`;
+
+                    csv += `${date},${customer},${phone},${type},${status},${total},${details}\n`;
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Cake_Heaven_Report_${new Date().toISOString().slice(0,10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
             },
 
             attachMobileListeners() {
                 const toggle = document.getElementById('sidebarToggle');
                 const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
 
                 toggle.addEventListener('click', () => {
                     sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
                 });
+
+                if (overlay) {
+                    overlay.addEventListener('click', () => {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    });
+                }
 
                 // Close sidebar when clicking a nav item on mobile
                 document.querySelectorAll('.nav-item').forEach(item => {
                     item.addEventListener('click', () => {
                         if (window.innerWidth <= 992) {
                             sidebar.classList.remove('active');
+                            if (overlay) overlay.classList.remove('active');
                         }
                     });
                 });
@@ -986,6 +1198,7 @@
             },
 
             async loadCustomers() {
+                if (!auth.currentUser) return;
                 this.setLoading(true);
                 try {
                     const snap1 = await getDocs(collection(db, 'custom_orders'));
@@ -1030,6 +1243,7 @@
             },
 
             async loadOrders() {
+                if (!auth.currentUser) return;
                 this.setLoading(true);
                 try {
                     const customSnap = await getDocs(collection(db, 'custom_orders'));
@@ -1081,6 +1295,10 @@
                     } else if (status === 'accepted') {
                         buttons = `
                             <button data-id="${order.id}" data-type="${order.type}" data-action="delivered" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #fb8c00; width:100%;">Mark Delivered</button>
+                        `;
+                    } else if (status === 'delivered') {
+                        buttons = `
+                            <button data-id="${order.id}" data-type="${order.type}" data-action="marked" class="btn-add" style="padding: 5px 10px; font-size: 0.8rem; background: #8e24aa; width:100%;">Mark</button>
                         `;
                     }
 
@@ -1135,6 +1353,7 @@
             },
 
             async loadProducts() {
+                if (!auth.currentUser) return;
                 this.setLoading(true);
                 try {
                     const q = query(productsCollection, orderBy('createdAt', 'desc'));
@@ -1219,6 +1438,7 @@
             },
 
             async updateDashboard() {
+                if (!auth.currentUser) return;
                 try {
                     const customSnap = await getDocs(collection(db, 'custom_orders'));
                     const standardSnap = await getDocs(collection(db, 'orders'));

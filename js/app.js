@@ -141,7 +141,7 @@ const App = {
                     <div class="container">
                         <div class="hero-content">
                             <h1>Delicious Cakes Made with Love</h1>
-                            <p>Where every bite feels like heaven. Experience the finest homemade cakes in Lucknow.</p>
+                            <p>Where every bite feels like heaven. Experience the finest homemade cakes in Faridabad.</p>
                             <a href="#menu" class="btn-primary">Order Now</a>
                         </div>
                     </div>
@@ -152,7 +152,7 @@ const App = {
                         <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.5rem;">Our Favorites</h2>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
                             <div class="cake-card" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft);">
-                                <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80" alt="Delicious Chocolate Truffle Cake - Cake Heaven Lucknow" style="width: 100%; height: auto; max-height: 320px; object-fit: contain;">
+                                <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80" alt="Delicious Chocolate Truffle Cake - Cake Heaven Faridabad" style="width: 100%; height: auto; max-height: 320px; object-fit: contain;">
                                 <div style="padding: 20px;">
                                     <h3>Chocolate Truffle</h3>
                                     <p>Rich, creamy, and heavenly.</p>
@@ -160,7 +160,7 @@ const App = {
                                 </div>
                             </div>
                             <div class="cake-card" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft);">
-                                <img src="https://images.unsplash.com/photo-1627834377411-8da5f4f09de8?auto=format&fit=crop&w=400&q=80" alt="Premium Red Velvet Cake Lucknow - Best Quality" style="width: 100%; height: auto; max-height: 320px; object-fit: contain;">
+                                <img src="https://images.unsplash.com/photo-1627834377411-8da5f4f09de8?auto=format&fit=crop&w=400&q=80" alt="Premium Red Velvet Cake Faridabad - Best Quality" style="width: 100%; height: auto; max-height: 320px; object-fit: contain;">
                                 <div style="padding: 20px;">
                                     <h3>Premium Red Velvet</h3>
                                     <p>A classic taste of elegance.</p>
@@ -184,7 +184,7 @@ const App = {
                         <h2 style="margin-bottom: 50px;">What Our Customers Say</h2>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
                             <div style="font-style: italic; background: var(--cream); padding: 30px; border-radius: 20px;">
-                                "The best cake shop in Lucknow! The bento cakes are so cute and delicious." - Aditi S.
+                                "The best cake shop in Faridabad! The bento cakes are so cute and delicious." - Aditi S.
                             </div>
                             <div style="font-style: italic; background: var(--cream); padding: 30px; border-radius: 20px;">
                                 "Ordered a designer cake for my daughter's birthday. It was exactly like the photo!" - Rahul M.
@@ -361,6 +361,9 @@ const App = {
                                         <label><input type="radio" name="custom_payment" value="COD"> Cash on Delivery</label>
                                     </div>
                                 </div>
+                                <div style="background: var(--cream); padding: 12px; border-radius: 10px; border-left: 4px solid var(--gold); margin-bottom: 10px; font-size: 0.9rem;">
+                                    <strong>Important:</strong> Delivery charges depend on distance and will be calculated on WhatsApp.
+                                </div>
                                 <button type="submit" class="btn-primary" style="margin-top: 20px;">Submit via WhatsApp</button>
                             </form>
                         </div>
@@ -430,6 +433,9 @@ const App = {
                                             <label><input type="radio" name="payment" value="COD"> Cash on Delivery</label>
                                         </div>
                                     </div>
+                                    <div style="background: var(--cream); padding: 12px; border-radius: 10px; border-left: 4px solid var(--gold); margin-bottom: 10px; font-size: 0.9rem;">
+                                        <strong>Important:</strong> Delivery charges depend on distance and will be confirmed on WhatsApp.
+                                    </div>
                                     <button type="submit" class="btn-primary" style="width: 100%;">Place Order via WhatsApp</button>
                                 </form>
                             </div>
@@ -445,7 +451,7 @@ const App = {
                         <div class="about-grid">
                             <div>
                                 <h2 style="font-size: 3rem; margin-bottom: 30px;">About Priyanka's Kitchen</h2>
-                                <p style="font-size: 1.1rem; margin-bottom: 20px;">Welcome to Cake Heaven! I am Priyanka, a passionate home baker based in Lucknow. What started as a hobby of baking for family and friends has now turned into a sweet mission to bring joy to every celebration.</p>
+                                <p style="font-size: 1.1rem; margin-bottom: 20px;">Welcome to Cake Heaven! I am Priyanka, a passionate home baker based in Faridabad. What started as a hobby of baking for family and friends has now turned into a sweet mission to bring joy to every celebration.</p>
                                 <p style="font-size: 1.1rem; margin-bottom: 20px;">Every cake here is handcrafted with premium ingredients, fresh cream, and most importantly, a lot of love. We believe that cakes shouldn't just look beautiful; they should taste like a dream.</p>
                                 <div style="display: flex; gap: 20px; margin-top: 30px;">
                                     <div style="text-align: center;">
@@ -480,7 +486,7 @@ const App = {
                             <div style="background: white; padding: 40px; border-radius: 30px; box-shadow: var(--shadow-soft); text-align: center;">
                                 <i class="fa-solid fa-location-dot" style="font-size: 2rem; color: var(--gold); margin-bottom: 20px;"></i>
                                 <h3>Pick-up Point</h3>
-                                <p>Near Gomti Nagar, Lucknow, UP</p>
+                                <p>9/1770, Sector 9, Faridabad, Haryana 121006</p>
                                 <a href="https://maps.app.goo.gl/VhdM8gx7DjJpcccR9?g_st=iw" target="_blank" style="display: inline-block; margin-top: 15px; color: var(--gold); font-weight: 600; text-decoration: underline;">View on Google Maps</a>
                             </div>
                             <div style="background: white; padding: 40px; border-radius: 30px; box-shadow: var(--shadow-soft); text-align: center;">
@@ -518,8 +524,32 @@ const App = {
                             <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft);">
                                 <img src="https://images.unsplash.com/photo-1519340333755-56e9c1d04579?auto=format&fit=crop&w=400&q=80" style="width: 100%; height: 200px; object-fit: cover;">
                                 <div style="padding: 25px;">
-                                    <h3 style="margin-bottom: 10px;">The Rise of Bento Cakes in Lucknow</h3>
+                                    <h3 style="margin-bottom: 10px;">The Rise of Bento Cakes in Faridabad</h3>
                                     <p style="opacity: 0.7; margin-bottom: 15px;">Small in size, big on joy! Why everyone is falling in love with these cute mini treats...</p>
+                                    <a href="#" style="color: var(--gold); font-weight: 600;">Read More →</a>
+                                </div>
+                            </div>
+                            <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft);">
+                                <img src="https://images.unsplash.com/photo-1588195538326-c5b1e9f6f5b4?auto=format&fit=crop&w=400&q=80" style="width: 100%; height: 200px; object-fit: cover;" alt="Cake storing guide">
+                                <div style="padding: 25px;">
+                                    <h3 style="margin-bottom: 10px;">The Ultimate Guide to Storing Custom Cakes</h3>
+                                    <p style="opacity: 0.7; margin-bottom: 15px;">To fridge or not to fridge? Learn the best practices for keeping your designer and cream cakes perfectly fresh...</p>
+                                    <a href="#" style="color: var(--gold); font-weight: 600;">Read More →</a>
+                                </div>
+                            </div>
+                            <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft);">
+                                <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=400&q=80" style="width: 100%; height: 200px; object-fit: cover;" alt="Trending cake designs">
+                                <div style="padding: 25px;">
+                                    <h3 style="margin-bottom: 10px;">Trending Cake Designs for 2026</h3>
+                                    <p style="opacity: 0.7; margin-bottom: 15px;">From vintage Lambeth piping to minimalist floral arrangements, discover what's hot in the baking world right now...</p>
+                                    <a href="#" style="color: var(--gold); font-weight: 600;">Read More →</a>
+                                </div>
+                            </div>
+                            <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft);">
+                                <img src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&w=400&q=80" style="width: 100%; height: 200px; object-fit: cover;" alt="Cake size guide">
+                                <div style="padding: 25px;">
+                                    <h3 style="margin-bottom: 10px;">Choosing the Right Cake Size</h3>
+                                    <p style="opacity: 0.7; margin-bottom: 15px;">Not sure if you need 1kg or 2kg? Read our quick guide to serving sizes so no guest ever goes home hungry...</p>
                                     <a href="#" style="color: var(--gold); font-weight: 600;">Read More →</a>
                                 </div>
                             </div>
@@ -535,7 +565,7 @@ const App = {
                         <h2 style="margin-bottom: 30px;">Terms & Conditions</h2>
                         <div style="opacity: 0.8; display: flex; flex-direction: column; gap: 20px;">
                             <p>1. <strong>Order Confirmation:</strong> All orders are confirmed only after payment or specific WhatsApp confirmation from our team.</p>
-                            <p>2. <strong>Delivery:</strong> We strive for timely delivery; however, delays due to traffic or weather in Lucknow are possible.</p>
+                            <p>2. <strong>Delivery:</strong> We strive for timely delivery; however, delays due to traffic or weather in Faridabad are possible.</p>
                             <p>3. <strong>Freshness:</strong> As our cakes are homemade and contain no preservatives, they should be consumed within 24-48 hours and kept refrigerated.</p>
                             <p>4. <strong>Custom Designs:</strong> Slight variations in color and design may occur as each cake is handcrafted.</p>
                         </div>
@@ -741,7 +771,7 @@ const App = {
                     message += `*Reference Image included in database*%0A%0A`;
                 }
                 
-                message += `*Order Link:* https://cakeheavenlucknow.com/admin%0A%0A`;
+                message += `*Order Link:* https://cakeheavenbypriyanka.shop/admin%0A%0A`;
                 message += `Please let me know the price and availability!`;
 
                 const whatsappUrl = `https://wa.me/918796343915?text=${message}`;
@@ -800,7 +830,7 @@ const App = {
         message += `%0A*Total Amount:* ₹${total}%0A`;
         message += `*Delivery:* ${date} at ${time}%0A`;
         message += `*Payment:* ${payment}%0A%0A`;
-        message += `*Order Link:* https://cakeheavenlucknow.com/admin%0A%0A`;
+        message += `*Order Link:* https://cakeheavenbypriyanka.shop/admin%0A%0A`;
         message += `Please confirm my order!`;
 
         const whatsappUrl = `https://wa.me/918796343915?text=${message}`;
